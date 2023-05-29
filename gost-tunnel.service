@@ -1,0 +1,15 @@
+[Unit]
+Description=GO Simple Tunnel
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=$GOST_COMMAND
+EnvironmentFile=/opt/hiddify-relay/data.conf
+Restart=always
+RestartSec=3
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
