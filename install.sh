@@ -1,4 +1,10 @@
 #!/bin/bash
+HEIGHT=20
+WIDTH=60
+CHOICE_HEIGHT=10
+BACKTITLE="Welcome to Hiddify Relay"
+TITLE="Enter your tunnel mode"
+MENU="Choose one of the following options:"
 
 # Functions for iptables setup
 install_iptables() {
@@ -236,7 +242,7 @@ install_haproxy() {
     sudo apt-get install haproxy -y
 
     # Download haproxy.cfg from GitHub
-    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/HiddifySupport-Return/HAProxy-tunnel/main/haproxy.cfg"
+    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/haproxy.cfg"
 
     # Remove existing haproxy.cfg
     sudo rm /etc/haproxy/haproxy.cfg
