@@ -57,7 +57,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 - میتوانید برای اطمینان از درست بودن مراحل گزینه شماره `2` را وارد نماید و پورت های مورد استفاده و فعال بودن تانل را چک نمایید.
 
 4. حذف تانل `GOST` از سرور میانی شما
-5. 
+
 5.خروج از منوی تانل `GOST`
 
 ## تانل XRAY (Dokodemo-door)
