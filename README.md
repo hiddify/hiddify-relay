@@ -15,5 +15,5 @@ all tunnel in one bash
 
 
 ```
-bash -c "$(curl -L https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/install.sh)"
+bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)"
 ```
