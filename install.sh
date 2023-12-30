@@ -467,7 +467,7 @@ while true; do
     1) install_socat ;;
     2) check_socat_port ;;
     3) uninstall_socat ;;
-    4) exit ;;
+    4) break ;;
     *) echo "Invalid choice. Please enter a valid option." ;;
     esac
 done
