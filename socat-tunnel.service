@@ -3,7 +3,7 @@ Description=socat tunnel
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/socat tcp-listen:$port,reuseaddr,fork tcp:$ip:$prot
+ExecStart=/usr/bin/socat tcp-listen:$port,reuseaddr,fork tcp:$ip:$port
 
 [Install]
 WantedBy=multi-user.target
