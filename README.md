@@ -15,7 +15,7 @@
 </div>
 
 # Hiddify Relay builder
-
+This script provides you with the following methods to create a tunnel between a relay server and your main server.
 
 
 
