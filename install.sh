@@ -343,7 +343,7 @@ check_socat_port() {
     fi
 }
 
-# Function to uninstall Socat and remove service file
+# Function to uninstall Socat
 uninstall_socat() {
     sudo systemctl stop socat
     sudo systemctl disable socat
