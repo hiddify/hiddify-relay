@@ -296,6 +296,65 @@ uninstall_haproxy() {
     echo "-------------------------------------------------------"
 }
 
+# Function to install Socat and setup tunnel service
+install_socat() {
+    # Install Socat
+    sudo apt-get update
+    sudo apt-get install socat -y
+
+    # Clone the service file from GitHub to /etc/systemd/system/
+    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/socat-tunnel.service
+    clear
+    # Get user input for $ip and $port
+    read -p "Enter the IP address of the main server: " ip
+    read -p "Enter the port used on the main server: " port
+
+    # Replace variables in the service file
+    sudo sed -i "s/\$ip/$ip/g" /etc/systemd/system/socat.service
+    sudo sed -i "s/\$port/$port/g" /etc/systemd/system/socat.service
+
+    # Reload systemd and start the service
+    sudo systemctl daemon-reload
+    sudo systemctl enable socat
+    sudo systemctl start socat
+    clear
+    echo "-------------------------------------------"
+    echo "Socat tunnel service installed and started."
+    echo "-------------------------------------------"
+}
+
+# Function to check port used by Socat
+check_socat_port() {
+    # Check port in use
+    echo "---------------------Port in use---------------------------"
+    sudo lsof -i -P -n -sTCP:LISTEN | grep socat | awk '{print "TCP:", $9}'
+
+    # Check socat service status
+    status=$(sudo systemctl is-active socat)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------socat service status---------------------"
+        echo -e "\e[32msocat Service Status: $status\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------socat service status---------------------"
+        echo -e "\e[31msocat Service Status: $status\e[0m"
+        echo "-------------------------------------------------------"
+    fi
+}
+
+# Function to uninstall Socat and remove service file
+uninstall_socat() {
+    sudo systemctl stop socat
+    sudo systemctl disable socat
+    sudo rm /etc/systemd/system/socat.service
+    sudo apt-get remove socat -y
+    clear
+    echo "-------------------------------------------------------"
+    echo "Socat and tunnel service uninstalled."
+    echo "-------------------------------------------------------"
+}
+
 # Functionality for iptables menu
 iptables_menu() {
     clear
@@ -392,6 +451,29 @@ haproxy_menu() {
     clear
 }
 
+# Functionality for Socat menu
+socat_menu() {
+    clear
+while true; do
+    echo "====== Socat Tunnel Menu ======"
+    echo -e "\e[1;32m1. Install Socat and setup tunnel service\e[0m"
+    echo -e "\e[1;34m2. Check port used by Socat\e[0m"
+    echo -e "\e[1;31m3. Uninstall Socat and remove tunnel service\e[0m"
+    echo -e "\e[1;33m4. Back to Main Menu\e[0m"
+
+    read -p "Enter your choice: " choice
+
+    case $choice in
+    1) install_socat ;;
+    2) check_socat_port ;;
+    3) uninstall_socat ;;
+    4) exit ;;
+    *) echo "Invalid choice. Please enter a valid option." ;;
+    esac
+done
+    clear
+}
+
 # Main Menu
 while true; do
     echo "Main Menu:"
@@ -399,7 +481,8 @@ while true; do
     echo "2. GOST Menu"
     echo "3. Xray Menu"
     echo "4. HAProxy Menu"
-    echo "5. Exit"
+    echo "5. Socat Menu"
+    echo "6. Exit"
 
     read -p "Enter your choice: " main_choice
 
@@ -408,7 +491,8 @@ while true; do
         2) gost_menu ;;
         3) xray_menu ;;
         4) haproxy_menu ;;
-        5) echo "Exiting..."; break ;;
+        5) socat_menu ;;
+        6) echo "Exiting..."; break ;;
         *) echo "Invalid option. Please select again." ;;
     esac
 done
