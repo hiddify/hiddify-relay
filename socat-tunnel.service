@@ -1,0 +1,9 @@
+[Unit]
+Description=socat tunnel
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat tcp-listen:$port,reuseaddr,fork tcp:$ip:$prot
+
+[Install]
+WantedBy=multi-user.target
