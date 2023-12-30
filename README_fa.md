@@ -1,5 +1,22 @@
-فارسی
-# all-in-one
+<base target="_blank">
+
+<div dir="ltr" >
+
+
+
+[**🇺🇸 English**](README.md)
+</div>
+<br>
+<div align=center markdown="1">
+ 
+
+![Hiddify Logo](https://user-images.githubusercontent.com/125398461/227777845-a4d0f86b-faa2-4f2b-a410-4aa5f68bfe19.png)
+
+</div>
+
+<div dir="rtl" align="right">
+ 
+# سازنده سرور میانی هیدیفای
 
 
 .با این اسکریپت شما میتونید 4 روش تانل زدن بین سرور ایران و خارج انجام دهید.
