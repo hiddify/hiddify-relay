@@ -306,8 +306,8 @@ install_socat() {
     sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/socat-tunnel.service
     clear
     # Get user input for $ip and $port
-    read -p "Enter the IP address of the main server: " ip
-    read -p "Enter the port used on the main server: " port
+    read -p "Enter Main-Server IP: " ip
+    read -p "Enter Main-Server Port: " port
 
     # Replace variables in the service file
     sudo sed -i "s/\$ip/$ip/g" /etc/systemd/system/socat.service
