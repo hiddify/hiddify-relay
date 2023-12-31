@@ -35,7 +35,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 ```
 <div align=center>
 
- <img src="https://github.com/hiddify/hiddify-relay/assets/125398461/3772cf2d-2898-497e-a3de-b72ac814d087" alt="Relay-builder Menu" width=30% />
+ <img src="https://github.com/hiddify/hiddify-relay/assets/125398461/3772cf2d-2898-497e-a3de-b72ac814d087" alt="Relay-builder Menu" />
 </div>
 
 ### 🛠️ IP-Tables Tunnel
