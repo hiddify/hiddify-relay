@@ -17,7 +17,7 @@
 # Hiddify Relay builder
 This script provides you with the following methods to create a tunnel between a relay server and your main server.
 
-`1. IP Tables`
+`1. IP-Tables`
 
 `2. GOST`
 
