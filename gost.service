@@ -1,0 +1,11 @@
+[Unit]
+Description=GO Simple Tunnel
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port
+
+[Install]
+WantedBy=multi-user.target

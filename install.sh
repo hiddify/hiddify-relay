@@ -44,9 +44,9 @@ uninstall_iptables() {
 
 # Functions for GOST setup
 install_gost() {
+    
     # Install required packages
     sudo apt update
-    sudo apt install wget nano -y
 
     # Download and install GOST
     wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
@@ -54,23 +54,16 @@ install_gost() {
     sudo mv gost-linux-amd64-2.11.5 /usr/local/bin/gost
     sudo chmod +x /usr/local/bin/gost
     clear
-    # Create a systemd service file
+
+    # Download the gost.service file from GitHub
+    sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/gost.service
+
+    # Prompt user for port number and domain
     read -p "Enter port number: " port
     read -p "Enter domain: " domain
 
-    cat <<EOF | sudo tee /usr/lib/systemd/system/gost.service > /dev/null
-[Unit]
-Description=GO Simple Tunnel
-After=network.target
-Wants=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port
-
-[Install]
-WantedBy=multi-user.target
-EOF
+    # Modify the gost.service file with user input
+    sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service
 
     # Start and enable the GOST service
     sudo systemctl start gost
