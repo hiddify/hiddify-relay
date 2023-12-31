@@ -319,7 +319,7 @@ install_socat() {
     sudo systemctl start socat
     clear
     echo "-------------------------------------------"
-    echo "Socat tunnel is installed and activated."
+    echo "Socat is installed and activated."
     echo "-------------------------------------------"
 }
 
