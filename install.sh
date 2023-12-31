@@ -252,7 +252,7 @@ install_haproxy() {
 
     # Replace $IP and $port in haproxy.cfg
     clear
-    read -p "Enter Iran-Server Free Port: " target_iport
+    read -p "Enter Relay-Server Free Port: " target_iport
     read -p "Enter Main-Server IP: " target_ip
     read -p "Enter Main-Server Port: " target_port
 
@@ -359,13 +359,13 @@ uninstall_socat() {
 iptables_menu() {
     clear
     while true; do
-        echo "IPTables Menu:"
-        echo -e "\e[1;32m1. Install iptables rules\e[0m"
-        echo -e "\e[1;34m2. Check ports in use\e[0m"
-        echo -e "\e[1;31m3. Uninstall iptables rules\e[0m"
-        echo -e "\e[1;33m4. Back to Main Menu\e[0m"
+        echo "IP-Tables Menu:"
+        echo -e "\e[1;32m1. Install IP-Tables Rules\e[0m"
+        echo -e "\e[1;34m2. Check Ports In Use\e[0m"
+        echo -e "\e[1;31m3. Uninstall IP-Tables Rules\e[0m"
+        echo -e "\e[1;33m4. Back To Main Menu\e[0m"
 
-        read -p "Enter your choice: " iptables_choice
+        read -p "Enter Your Choice: " iptables_choice
 
         case $iptables_choice in
             1) install_iptables ;;
@@ -384,12 +384,12 @@ gost_menu() {
     while true; do
         echo "GOST Menu:"
         echo -e "1. \e[32mInstall GOST\e[0m"
-        echo -e "2. \e[34mCheck GOST Port and Status\e[0m"
-        echo -e "3. \e[34mAdd Another Port and Domain\e[0m"
+        echo -e "2. \e[34mCheck GOST Port And Status\e[0m"
+        echo -e "3. \e[34mAdd Another Port And Domain\e[0m"
         echo -e "4. \e[31mUninstall GOST\e[0m"
-        echo -e "5. \e[33mBack to Main Menu\e[0m"
+        echo -e "5. \e[33mBack To Main Menu\e[0m"
 
-        read -p "Enter your choice: " gost_choice
+        read -p "Enter Your Choice: " gost_choice
 
         case $gost_choice in
             1) install_gost ;;
@@ -407,14 +407,14 @@ gost_menu() {
 xray_menu() {
     clear
     while true; do
-        echo "Xray Menu:"
-        echo -e "\e[1;32m1. Install Xray and add inbound\e[0m"
+        echo "Dokodemo-door Menu:"
+        echo -e "\e[1;32m1. Install Xray For Dokodemo-door And Add Inbound\e[0m"
         echo -e "\e[1;34m2. Check Xray Service Status\e[0m"
-        echo -e "\e[1;34m3. Add another inbound\e[0m"
-        echo -e "\e[1;31m4. Uninstall Xray and tunnel\e[0m"
-        echo -e "\e[1;33m5. Back to Main Menu\e[0m"
+        echo -e "\e[1;34m3. Add Another Inbound\e[0m"
+        echo -e "\e[1;31m4. Uninstall Xray And Tunnel\e[0m"
+        echo -e "\e[1;33m5. Back To Main Menu\e[0m"
 
-        read -p "Enter your choice: " xray_choice
+        read -p "Enter Your Choice: " xray_choice
 
         case $xray_choice in
             1) install_xray ;;
@@ -432,13 +432,13 @@ xray_menu() {
 haproxy_menu() {
     clear
     while true; do
-        echo "HAProxy Menu:"
-        echo -e "1. \e[32mInstall HAProxy\e[0m"
-        echo -e "2. \e[34mCheck HAProxy Port and Status\e[0m"
+        echo "HA-Proxy Menu:"
+        echo -e "1. \e[32mInstall HA-Proxy\e[0m"
+        echo -e "2. \e[34mCheck HA-Proxy Port and Status\e[0m"
         echo -e "3. \e[31mUninstall HAProxy\e[0m"
         echo -e "4. \e[33mBack to Main Menu\e[0m"
 
-        read -p "Enter your choice: " haproxy_choice
+        read -p "Enter Your Choice: " haproxy_choice
 
         case $haproxy_choice in
             1) install_haproxy ;;
@@ -456,12 +456,12 @@ socat_menu() {
     clear
 while true; do
     echo "====== Socat Tunnel Menu ======"
-    echo -e "\e[1;32m1. Install Socat and setup tunnel service\e[0m"
-    echo -e "\e[1;34m2. Check port used by Socat\e[0m"
-    echo -e "\e[1;31m3. Uninstall Socat and remove tunnel service\e[0m"
-    echo -e "\e[1;33m4. Back to Main Menu\e[0m"
+    echo -e "\e[1;32m1. Install Socat And Setup Tunnel Service\e[0m"
+    echo -e "\e[1;34m2. Check Socat Port\e[0m"
+    echo -e "\e[1;31m3. Uninstall Socat And Remove Tunnel Service\e[0m"
+    echo -e "\e[1;33m4. Back To Main Menu\e[0m"
 
-    read -p "Enter your choice: " choice
+    read -p "Enter Your Choice: " choice
 
     case $choice in
     1) install_socat ;;
@@ -477,7 +477,7 @@ done
 # Main Menu
 while true; do
     echo "Main Menu:"
-    echo "1. IPTables Tunnel"
+    echo "1. IP-Tables Tunnel"
     echo "2. GOST Tunnel"
     echo "3. Dokodemo-door Tunnel"
     echo "4. HA-Proxy Tunnel"
