@@ -35,7 +35,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 ```
 <div align=center>
 
- <img src="https://github.com/hiddify/hiddify-relay/assets/125398461/50bc6374-56b4-4eba-866e-c006e123435f" alt="Relay-builder Menu" width=30% />
+ <img src="https://github.com/hiddify/hiddify-relay/assets/125398461/3772cf2d-2898-497e-a3de-b72ac814d087" alt="Relay-builder Menu" width=30% />
 </div>
 
 ### 🛠️ IP-Tables Tunnel
@@ -43,8 +43,8 @@ According to the 1st picture above, choose number `1` and enter the `IPTables me
 
 <div align=center>
 
- ![IP-Tables Tunnel Menu](https://github.com/hiddify/hiddify-relay/assets/125398461/ddd9cf12-3d5c-4aab-9b36-278395c3cbfb)
- 
+![IP-Tables Tunnel Menu](https://github.com/hiddify/hiddify-relay/assets/125398461/da9b8dd7-8cb8-4ad6-963a-80d790f26d1a)
+
 </div>
 
 `1. Install iptables rules`
@@ -68,7 +68,7 @@ According to the 1st picture above, choose number `2` and enter the `GOST menu` 
 
 <div align=center>
  
-![GOST Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/afb47714-f566-4a24-a5c6-32b5c971927e)
+![GOST Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/fe813676-52e6-451f-8d78-22ebdfe2753e)
 
 </div>
 
@@ -99,7 +99,7 @@ According to the 1st picture above, choose number `3` and enter the `Dekodemo-do
 
 <div align=center>
  
-![Dokodemo Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/e8b92d4d-e60e-4526-9280-04d1aac6aa29)
+![Dokodemo Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/287db74b-cb88-4976-826e-5fcf5de99bfe)
 
 </div>
 
@@ -129,7 +129,7 @@ According to the 1st picture above, choose number `4` and enter the `HA-Proxy Me
 
 <div align=center>
 
- ![HA-Proxy Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/4bc0ad31-64b0-4b80-99be-01bf472ec5d4)
+ ![HA-Proxy Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/af49cad2-a3fb-4870-9cea-ad0c7b99305c)
 
 </div>
 
