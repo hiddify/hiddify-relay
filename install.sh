@@ -44,7 +44,7 @@ uninstall_iptables() {
 
 # Functions for GOST setup
 install_gost() {
-    
+
     # Install required packages
     sudo apt update
 
@@ -57,7 +57,7 @@ install_gost() {
 
     # Download the gost.service file from GitHub
     sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/gost.service
-
+    clear
     # Prompt user for port number and domain
     read -p "Enter port number: " port
     read -p "Enter domain: " domain
