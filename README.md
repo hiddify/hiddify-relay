@@ -183,7 +183,7 @@ In order to go back to the main menu press `4`.
 <br>
 
 > [!NOTE]
-> If you want to add the relay server to Hiddify Manager please read this [article](https://github.com/hiddify/Hiddify-Manager/wiki/How-to-add-relay-domain-to-Hiddify-manager).
+> If you want to add the relay server to `Hiddify Manager` please read this [article](https://github.com/hiddify/Hiddify-Manager/wiki/How-to-add-relay-domain-to-Hiddify-manager).
 
 
 <div align=center>
