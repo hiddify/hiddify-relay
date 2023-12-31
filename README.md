@@ -41,7 +41,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 ### 🛠️ IP-Tables Tunnel
 According to the 1st picture above, choose number `1` and enter the `IPTables menu`:
 
-cccc
+<div align=center>
 
  ![IP-Tables Tunnel Menu](https://github.com/hiddify/hiddify-relay/assets/125398461/ddd9cf12-3d5c-4aab-9b36-278395c3cbfb)
  
@@ -61,7 +61,7 @@ This option clears all rules created for the tunnel and all other rules.
 > Be careful that if you have created special rules next to the tunnel manually, they will be deleted with this command.
 
 `4. Back to Main Menu`
-in order to go back to the main menu press `4`
+in order to go back to the main menu press `4` .
 
 ### 🛠️ GOST Tunnel
 According to the 1st picture above, choose number `2` and enter the `IPTables menu`:
@@ -91,7 +91,7 @@ This option will remove the GOST tunnel from your relay server
 
 `5. Back to Main Menu`
 
-in order to go back to the main menu press `5`
+in order to go back to the main menu press `5` .
 
 
 
