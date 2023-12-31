@@ -163,7 +163,7 @@ According to the 1st picture above, choose number `5` and enter the `Socat Tunne
 
 </div>
 `1. Install Socat And Setup Tunnel Service`
-- After selecting option `1`, wait for the installation of the HA-Proxy package.- 
+- After selecting option `1`, wait for the installation of the Socat package.
 - Then enter the `IP` and `Port` of main server.
 - The tunnel will be created based on the
 `2. Check Socat Port`
