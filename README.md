@@ -21,7 +21,7 @@ This script provides you with the following methods to create a tunnel between a
 
 `2. GOST`
 
-`3. Xray-Dokodemo`
+`3. Dokodemo-Door`
 
 `4. HA-Proxy`
 
