@@ -477,11 +477,11 @@ done
 # Main Menu
 while true; do
     echo "Main Menu:"
-    echo "1. IPTables Menu"
-    echo "2. GOST Menu"
-    echo "3. Xray Menu"
-    echo "4. HAProxy Menu"
-    echo "5. Socat Menu"
+    echo "1. IPTables Tunnel"
+    echo "2. GOST Tunnel"
+    echo "3. Dokodemo-door Tunnel"
+    echo "4. HA-Proxy Tunnel"
+    echo "5. Socat Tunnel"
     echo "6. Exit"
 
     read -p "Enter your choice: " main_choice
