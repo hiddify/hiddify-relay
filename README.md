@@ -39,7 +39,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 </div>
 
 ### 🛠️ IP-Tables Tunnel
-According to the 1st picture above, choose number `1` and enter the `IPTables menu` to manage `IPTables tunnel`:
+According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it:
 
 <div align=center>
 
@@ -49,7 +49,7 @@ According to the 1st picture above, choose number `1` and enter the `IPTables me
 
 `1. Install iptables rules`
 
-After selecting the number `1` in the `IPTables Menu`, it asks you to enter the IP address of the main server and press `Enter` button to activate the tunnel on ports `443` and `80`.
+After selecting the number `1` in the `IP-Tables Menu`, it asks you to enter the IP address of the main server and press `Enter` button to activate the tunnel on ports `443` and `80`.
 
 `2. Check ports in use`
 This option shows you the ports used in the IPTables tunnel.
@@ -64,7 +64,7 @@ This option clears all rules created for the tunnel and all other rules.
 In order to go back to the main menu press `4` .
 
 ### 🛠️ GOST Tunnel
-According to the 1st picture above, choose number `2` and enter the `GOST menu` to manage `GOST tunnel`:
+According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it:
 
 <div align=center>
  
@@ -74,7 +74,10 @@ According to the 1st picture above, choose number `2` and enter the `GOST menu` 
 
 `1. Install GOST`
 
-After choosing number `1`, wait until the tunnel is installed. After the installation is complete, in the first step, you must enter the desired port for the tunnel and then press Enter. In the next step, enter the domain or subdomain of your main server, then press `Enter`. Wait until the tunnel should be started. After starting, the message `Gost install and enabled` will be displayed in green.
+- After choosing number `1`, wait until the tunnel is installed.
+- After the installation is complete, in the first step, you must enter the desired port for the tunnel and then press Enter.
+- In the next step, enter the domain or subdomain of your main server, then press `Enter`. Wait until the tunnel should be started.
+- After starting, the message `Gost tunnel is installed and activated` will be displayed in green.
 
 `2. Check GOST Port and Status`
 
@@ -95,7 +98,7 @@ In order to go back to the main menu press `5` .
 
 
 ### 🛠️ Dokodemo-door Tunnel
-According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Menu` to manage `Dokodemo-door tunnel`:
+According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it:
 
 <div align=center>
  
@@ -110,7 +113,7 @@ According to the 1st picture above, choose number `3` and enter the `Dekodemo-do
 - The message `Inbound added and tunnel started` will be displayed.
 
 `2. Check Xray Service Status`
-After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed to you.
+After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Add another inbound`
 - You can use option `3` in the Dokodemo-door tunnel menu to create another inbound connection and connect your relay server to several external servers.
@@ -119,13 +122,14 @@ After selecting option `2`, the ports used in the tunnel and the status of the t
 - You can enter option number `2` to ensure that the previous steps are correctly done and to check the used ports and to see if the tunnel is activated.
 
 
-`4. Uninstall Xray and tunnel`
-Choose this option to remove Dokodemo-door tunnel and Xray core from your relay server
+`4. Uninstall Xray and Dokodemo-Door tunnel`
+Choose this option to remove Dokodemo-door tunnel and Xray core from your relay server.
+
 `5. Back to Main Menu`
 In order to go back to the main menu press `5`.
 
 ### 🛠️ HA-Proxy Tunnel
-According to the 1st picture above, choose number `4` and enter the `HA-Proxy Menu` to manage `HA-Proxy tunnel`:
+According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it:
 
 <div align=center>
 
@@ -141,12 +145,36 @@ According to the 1st picture above, choose number `4` and enter the `HA-Proxy Me
 - After the correct operation, the message `HA-Proxy installed and activated successfully!` will be displayed on the screen.
 
 `2. Check HA-Proxy Ports and Status`
-After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed to you.
+After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Uninstall HA-Proxy`
 Use this option to remove HA-Proxy tunnel from the relay server.
 
 `4. Back to Main Menu`
+In order to go back to the main menu press `4`.
+
+
+### 🛠️ Socat Tunnel
+According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it:
+
+<div align=center>
+
+ ![Socat Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/d0d55310-f06d-44f2-83df-9b698ee9d0fa)
+
+</div>
+`1. Install Socat And Setup Tunnel Service`
+- After selecting option `1`, wait for the installation of the HA-Proxy package.- 
+- Then enter the `IP` and `Port` of main server.
+- The tunnel will be created based on the
+`2. Check Socat Port`
+After selecting option `2`, the ports used in the tunnel will be displayed on the screen.
+
+
+`3. Uninstall Socat And Remove Tunnel Service`
+Use this option to remove Socat tunnel from the relay server.
+
+
+`4. Back To Main Menu`
 In order to go back to the main menu press `4`.
 
 
