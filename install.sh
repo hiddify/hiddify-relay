@@ -29,6 +29,18 @@ check_port_iptables() {
     echo "----------------- Ports in Use for iptables -------------------"
     sudo iptables -L -n -v
     echo "---------------------------------------------------------------"
+
+    status=$(sudo systemctl is-active iptables)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------iptables service status---------------------"
+        echo -e "\e[32miptables Service Status: $status\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------iptables service status---------------------"
+        echo -e "\e[31miptables Service Status: $status\e[0m"
+        echo "-------------------------------------------------------"
+    fi
 }
 
 uninstall_iptables() {
