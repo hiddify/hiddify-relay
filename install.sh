@@ -68,7 +68,7 @@ install_gost() {
     clear
 
     # Download the gost.service file from GitHub
-    sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/gost.service
+    sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service
     clear
     # Prompt user for port number and domain
     read -p "Enter port number: " port
@@ -251,7 +251,7 @@ install_haproxy() {
     fi
 
     # Download haproxy.cfg from GitHub
-    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/haproxy.cfg"
+    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg"
 
     # Remove existing haproxy.cfg
     sudo rm /etc/haproxy/haproxy.cfg
@@ -316,7 +316,7 @@ install_socat() {
     fi
 
     # Clone the service file from GitHub to /etc/systemd/system/
-    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/socat-tunnel.service
+    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/socat-tunnel.service
     clear
     # Get user input for $ip and $port
     read -p "Enter Main-Server IP: " ip
