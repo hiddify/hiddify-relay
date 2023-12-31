@@ -21,7 +21,7 @@ install_iptables() {
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
     clear
     echo "---------------------------------------------------------------"
-    echo -e "\e[32miptables configured\e[0m"
+    echo -e "\e[32mIP-Tables configured\e[0m"
     echo "---------------------------------------------------------------"
 }
 
@@ -38,7 +38,7 @@ uninstall_iptables() {
     sudo iptables -t nat -X
     rm /etc/iptables/rules.v4
     echo "---------------------------------------------------------------"
-    echo -e "\e[31miptables rules cleared\e[0m"
+    echo -e "\e[31mIP-Tables rules cleared\e[0m"
     echo "---------------------------------------------------------------"
 }
 
@@ -77,7 +77,7 @@ EOF
     sudo systemctl enable gost
     clear
     echo "-----------------------------------------"
-    echo -e "\e[32mGost install and enabled\e[0m"
+    echo -e "\e[32mGost tunnel is installed and activated.\e[0m"
     echo "-----------------------------------------"
 }
 
@@ -263,7 +263,7 @@ install_haproxy() {
     sudo systemctl restart haproxy
     clear
     echo "-----------------------------------------"
-    echo "HA-Proxy installed and activated successfully!"
+    echo "HA-Proxy is installed and activated"
     echo "-----------------------------------------"
 }
 
@@ -292,7 +292,7 @@ uninstall_haproxy() {
     sudo apt-get remove --purge haproxy -y
     clear
     echo "-------------------------------------------------------"
-    echo "HA-Proxy uninstalled."
+    echo "HA-Proxy Uninstalled."
     echo "-------------------------------------------------------"
 }
 
@@ -319,7 +319,7 @@ install_socat() {
     sudo systemctl start socat
     clear
     echo "-------------------------------------------"
-    echo "Socat tunnel service installed and started."
+    echo "Socat tunnel is installed and activated."
     echo "-------------------------------------------"
 }
 
@@ -351,7 +351,7 @@ uninstall_socat() {
     sudo apt-get remove socat -y
     clear
     echo "-------------------------------------------------------"
-    echo "Socat and tunnel service uninstalled."
+    echo "Socat tunnel Uninstalled."
     echo "-------------------------------------------------------"
 }
 
