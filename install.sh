@@ -307,9 +307,13 @@ uninstall_haproxy() {
 
 # Function to install Socat and setup tunnel service
 install_socat() {
-    # Install Socat
-    sudo apt-get update
-    sudo apt-get install socat -y
+    # Check if Socat is installed
+    if ! command -v socat &> /dev/null; then
+        # If not installed, install Socat
+        sudo apt-get install socat -y
+    else
+        echo "Socat is already installed."
+    fi
 
     # Clone the service file from GitHub to /etc/systemd/system/
     sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/socat-tunnel.service
