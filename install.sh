@@ -235,9 +235,9 @@ uninstall_xray() {
     echo "---------------------------------------------------------------"
 }
 
-# Functions for HAProxy setup
+# Functions for HA-Proxy setup
 install_haproxy() {
-    # Install HAProxy
+    # Install HA-Proxy
     sudo apt-get update
     sudo apt-get install haproxy -y
 
@@ -258,12 +258,12 @@ install_haproxy() {
 
     sudo sed -i "s/\$iport/$target_iport/g; s/\$IP/$target_ip/g; s/\$port/$target_port/g" /etc/haproxy/haproxy.cfg
 
-    # Restart HAProxy
-    echo "Restarting HAProxy..."
+    # Restart HA-Proxy
+    echo "Restarting HA-Proxy..."
     sudo systemctl restart haproxy
     clear
     echo "-----------------------------------------"
-    echo "HAProxy installed and active successfully!"
+    echo "HA-Proxy installed and activated successfully!"
     echo "-----------------------------------------"
 }
 
@@ -276,12 +276,12 @@ check_haproxy() {
     status=$(sudo systemctl is-active haproxy)
 
     if [ "$status" = "active" ]; then
-        echo "---------------HAProxy service status---------------------"
-        echo -e "\e[32mHAProxy Service Status: $status\e[0m"
+        echo "---------------HA-Proxy service status---------------------"
+        echo -e "\e[32mHA-Proxy Service Status: $status\e[0m"
         echo "--------------------------------------------"
     else
-        echo "---------------HAProxy service status---------------------"
-        echo -e "\e[31mHAProxy Service Status: $status\e[0m"
+        echo "---------------HA-Proxy service status---------------------"
+        echo -e "\e[31mHA-Proxy Service Status: $status\e[0m"
         echo "-------------------------------------------------------"
     fi
 }
@@ -292,7 +292,7 @@ uninstall_haproxy() {
     sudo apt-get remove --purge haproxy -y
     clear
     echo "-------------------------------------------------------"
-    echo "HAProxy uninstalled."
+    echo "HA-Proxy uninstalled."
     echo "-------------------------------------------------------"
 }
 
