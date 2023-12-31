@@ -38,10 +38,10 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
  <img src="https://github.com/hiddify/hiddify-relay/assets/125398461/50bc6374-56b4-4eba-866e-c006e123435f" alt="Relay-builder Menu" width=30% />
 </div>
 
-### 🛠️IP-Tables Tunnel
-According to the picture above, choose number `1` and enter the `IPTables menu`:
+### 🛠️ IP-Tables Tunnel
+According to the 1st picture above, choose number `1` and enter the `IPTables menu`:
 
-<div align=center>
+cccc
 
  ![IP-Tables Tunnel Menu](https://github.com/hiddify/hiddify-relay/assets/125398461/ddd9cf12-3d5c-4aab-9b36-278395c3cbfb)
  
@@ -62,6 +62,46 @@ This option clears all rules created for the tunnel and all other rules.
 
 `4. Back to Main Menu`
 in order to go back to the main menu press `4`
+
+### 🛠️ GOST Tunnel
+According to the 1st picture above, choose number `2` and enter the `IPTables menu`:
+
+<div align=center>
+ 
+![GOST Tunnel](https://github.com/hiddify/hiddify-relay/assets/125398461/afb47714-f566-4a24-a5c6-32b5c971927e)
+
+</div>
+
+`1. Install GOST`
+
+After choosing number `1`, wait until the tunnel is installed. After the installation is complete, in the first step, you must enter the desired port for the tunnel and then press Enter. In the next step, enter the domain or subdomain of your main server, then press `Enter`. Wait until the tunnel should be started. After starting, the message `Gost install and enabled` will be displayed in green.
+
+`2. Check GOST Port and Status`
+
+After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed to you.
+
+`3. Add Another Port and Domain`
+- You can use this option if you want to tunnel from the relay server to several outside servers.
+- After selecting the number `3`, you must enter the new port, press the `Enter` button, then enter the domain of the main server and press the `Enter` button.
+- You can enter option number `2` to ensure that the previous steps are done correctly and check the ports used and see if the tunnel is activated.
+
+`4. Uninstall GOST`
+
+This option will remove the GOST tunnel from your relay server
+
+`5. Back to Main Menu`
+
+in order to go back to the main menu press `5`
+
+
+
+
+
+
+
+
+
+
 
 
 
