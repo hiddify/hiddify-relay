@@ -242,9 +242,13 @@ uninstall_xray() {
 
 # Functions for HA-Proxy setup
 install_haproxy() {
-    # Install HA-Proxy
-    sudo apt-get update
-    sudo apt-get install haproxy -y
+    # Check if HAProxy is installed
+    if ! command -v haproxy &> /dev/null; then
+        # If not installed, install HAProxy
+        sudo apt-get install haproxy -y
+    else
+        echo "HAProxy is already installed."
+    fi
 
     # Download haproxy.cfg from GitHub
     wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/haproxy.cfg"
