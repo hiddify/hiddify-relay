@@ -194,7 +194,7 @@ check_service_xray() {
     echo "---------------------------------------------------------------"
     # Check Xray service status
     status=$(sudo systemctl is-active xray)
-    echo "----------------dokodemo-door service status--------------------"
+    echo "----------------Dokodemo-Door service status--------------------"
     if [ "$status" = "active" ]; then
         echo -e "\e[32mXray Service Status: $status\e[0m"
     else
@@ -407,8 +407,8 @@ gost_menu() {
 xray_menu() {
     clear
     while true; do
-        echo "Dokodemo-door Menu:"
-        echo -e "\e[1;32m1. Install Xray For Dokodemo-door And Add Inbound\e[0m"
+        echo "Dokodemo-Door Menu:"
+        echo -e "\e[1;32m1. Install Xray For Dokodemo-Door And Add Inbound\e[0m"
         echo -e "\e[1;34m2. Check Xray Service Status\e[0m"
         echo -e "\e[1;34m3. Add Another Inbound\e[0m"
         echo -e "\e[1;31m4. Uninstall Xray And Tunnel\e[0m"
@@ -455,7 +455,7 @@ haproxy_menu() {
 socat_menu() {
     clear
 while true; do
-    echo "====== Socat Tunnel Menu ======"
+    echo "Socat Tunnel Menu:"
     echo -e "\e[1;32m1. Install Socat And Setup Tunnel Service\e[0m"
     echo -e "\e[1;34m2. Check Socat Port\e[0m"
     echo -e "\e[1;31m3. Uninstall Socat And Remove Tunnel Service\e[0m"
@@ -479,7 +479,7 @@ while true; do
     echo "Main Menu:"
     echo "1. IP-Tables Tunnel"
     echo "2. GOST Tunnel"
-    echo "3. Dokodemo-door Tunnel"
+    echo "3. Dokodemo-Door Tunnel"
     echo "4. HA-Proxy Tunnel"
     echo "5. Socat Tunnel"
     echo "6. Exit"
