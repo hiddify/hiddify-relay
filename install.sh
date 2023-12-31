@@ -455,7 +455,7 @@ haproxy_menu() {
 socat_menu() {
     clear
 while true; do
-    echo "Socat Tunnel Menu:"
+    echo "Socat Menu:"
     echo -e "\e[1;32m1. Install Socat And Setup Tunnel Service\e[0m"
     echo -e "\e[1;34m2. Check Socat Port\e[0m"
     echo -e "\e[1;31m3. Uninstall Socat And Remove Tunnel Service\e[0m"
