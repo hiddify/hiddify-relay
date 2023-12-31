@@ -263,7 +263,7 @@ install_haproxy() {
     sudo systemctl restart haproxy
     clear
     echo "-----------------------------------------"
-    echo "HA-Proxy is installed and activated"
+    echo "HA-Proxy tunnel is installed and activated"
     echo "-----------------------------------------"
 }
 
@@ -319,7 +319,7 @@ install_socat() {
     sudo systemctl start socat
     clear
     echo "-------------------------------------------"
-    echo "Socat is installed and activated."
+    echo "Socat tunnel is installed and activated."
     echo "-------------------------------------------"
 }
 
