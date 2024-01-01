@@ -31,7 +31,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 </div>
 
 ### 🛠️ IP-Tables Tunnel
-According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it:
+According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it.
 
 <div align=center>
 
@@ -56,7 +56,7 @@ This option clears all rules created for the tunnel and all other rules.
 In order to go back to the main menu press `4` .
 
 ### 🛠️ GOST Tunnel
-According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it:
+According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it.
 
 <div align=center>
  
@@ -90,7 +90,7 @@ In order to go back to the main menu press `5` .
 
 
 ### 🛠️ Dokodemo-door Tunnel
-According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it:
+According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it.
 
 <div align=center>
  
@@ -121,7 +121,7 @@ Choose this option to remove Dokodemo-door tunnel and Xray core from your relay 
 In order to go back to the main menu press `5`.
 
 ### 🛠️ HA-Proxy Tunnel
-According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it:
+According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it.
 
 <div align=center>
 
@@ -147,7 +147,7 @@ In order to go back to the main menu press `4`.
 
 
 ### 🛠️ Socat Tunnel
-According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it:
+According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it.
 
 <div align=center>
 
