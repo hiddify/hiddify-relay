@@ -17,7 +17,10 @@
 # Hiddify Relay builder
 This script provides you with the following methods to create a tunnel between a relay server and your main server.
 
+<div align=center>
+ 
 `1. IP-Tables`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`2. GOST`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3. Dokodemo-Door`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`4. HA-Proxy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`5. Socat`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
 
 ## ⚙️ Installation
 In order to create tunnels on your relay server, you just need to run the following command.
