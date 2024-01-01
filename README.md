@@ -108,16 +108,19 @@ According to the 1st picture above, choose number `3` and enter the `Dekodemo-do
 - The message `Inbound added and tunnel started` will be displayed.
 
 `2. Check Xray Service Status`
+
 After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Add another inbound`
 - You can use option `3` in the Dokodemo-door tunnel menu to create another inbound connection and connect your relay server to several external servers.
 - After selecting option `3`, in the `new address section`, enter the `IP address` or the `domain` of your new server, then press `Enter`.
-- Next step, enter the new port in the `new port field` and press `Enter` button. You will see inbound added.
+- Next step, enter the new port in the `new port field` and press `Enter` button.
+- The message `Another inbound added` will be displayed.
 - You can enter option number `2` to ensure that the previous steps are correctly done and to check the used ports and to see if the tunnel is activated.
 
 
 `4. Uninstall Xray and Dokodemo-Door tunnel`
+
 Choose this option to remove Dokodemo-door tunnel and Xray core from your relay server.
 
 `5. Back to Main Menu`
