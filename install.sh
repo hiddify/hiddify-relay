@@ -29,6 +29,18 @@ check_port_iptables() {
     echo "----------------- Ports in Use for iptables -------------------"
     sudo iptables -L -n -v
     echo "---------------------------------------------------------------"
+
+    status=$(sudo systemctl is-active iptables)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------iptables service status---------------------"
+        echo -e "\e[32miptables Service Status: $status\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------iptables service status---------------------"
+        echo -e "\e[31miptables Service Status: $status\e[0m"
+        echo "-------------------------------------------------------"
+    fi
 }
 
 uninstall_iptables() {
@@ -44,9 +56,9 @@ uninstall_iptables() {
 
 # Functions for GOST setup
 install_gost() {
+
     # Install required packages
     sudo apt update
-    sudo apt install wget nano -y
 
     # Download and install GOST
     wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
@@ -54,23 +66,16 @@ install_gost() {
     sudo mv gost-linux-amd64-2.11.5 /usr/local/bin/gost
     sudo chmod +x /usr/local/bin/gost
     clear
-    # Create a systemd service file
+
+    # Download the gost.service file from GitHub
+    sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service
+    clear
+    # Prompt user for port number and domain
     read -p "Enter port number: " port
     read -p "Enter domain: " domain
 
-    cat <<EOF | sudo tee /usr/lib/systemd/system/gost.service > /dev/null
-[Unit]
-Description=GO Simple Tunnel
-After=network.target
-Wants=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port
-
-[Install]
-WantedBy=multi-user.target
-EOF
+    # Modify the gost.service file with user input
+    sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service
 
     # Start and enable the GOST service
     sudo systemctl start gost
@@ -237,12 +242,16 @@ uninstall_xray() {
 
 # Functions for HA-Proxy setup
 install_haproxy() {
-    # Install HA-Proxy
-    sudo apt-get update
-    sudo apt-get install haproxy -y
+    # Check if HAProxy is installed
+    if ! command -v haproxy &> /dev/null; then
+        # If not installed, install HAProxy
+        sudo apt-get install haproxy -y
+    else
+        echo "HAProxy is already installed."
+    fi
 
     # Download haproxy.cfg from GitHub
-    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/haproxy.cfg"
+    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg"
 
     # Remove existing haproxy.cfg
     sudo rm /etc/haproxy/haproxy.cfg
@@ -298,12 +307,16 @@ uninstall_haproxy() {
 
 # Function to install Socat and setup tunnel service
 install_socat() {
-    # Install Socat
-    sudo apt-get update
-    sudo apt-get install socat -y
+    # Check if Socat is installed
+    if ! command -v socat &> /dev/null; then
+        # If not installed, install Socat
+        sudo apt-get install socat -y
+    else
+        echo "Socat is already installed."
+    fi
 
     # Clone the service file from GitHub to /etc/systemd/system/
-    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/HiddifySupport-Return/hiddify-relay/main/socat-tunnel.service
+    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/socat-tunnel.service
     clear
     # Get user input for $ip and $port
     read -p "Enter Main-Server IP: " ip
