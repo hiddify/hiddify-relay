@@ -137,7 +137,7 @@ According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tu
 - After installation, in the `Relay port section`, enter the desired port in your relay server (recommended port 443)
 - Then enter the IP address of your main server in the Enter Main-Server IP field.
 - Then, in the Enter Main-Server Port section, enter the port freed on your main and external server (e.g. by default, Hiddify Manager uses port 443, and it is recommended to use this port).
-- After the correct operation, the message `HA-Proxy tunnel is installed and activated successfully!` will be displayed on the screen.
+- After the correct operation, the message `HA-Proxy tunnel is installed and activated.` will be displayed on the screen.
 
 `2. Check HA-Proxy Ports and Status`
 After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
@@ -162,7 +162,7 @@ According to the 1st picture above, choose number `5` and enter the `Socat Tunne
 
 - After selecting option `1`, wait for the installation of the Socat package.
 - Then enter the `IP` and `Port` of main server.
-- After the correct operation, the message `Socat tunnel is installed and activated successfully!` will be displayed on the screen.
+- After the correct operation, the message `Socat tunnel is installed and activated.` will be displayed on the screen.
   
 `2. Check Socat Port`
 After selecting option `2`, the ports used in the tunnel will be displayed on the screen.
