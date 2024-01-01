@@ -76,7 +76,7 @@ According to the 1st picture above, choose number `2` and enter the `GOST Tunnel
 
 `2. Check GOST Port and Status`
 
-After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed to you.
+After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Add Another Port and Domain`
 - You can use this option if you want to tunnel from the relay server to several outside servers.
