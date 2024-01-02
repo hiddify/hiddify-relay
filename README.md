@@ -17,15 +17,10 @@
 # Hiddify Relay builder
 This script provides you with the following methods to create a tunnel between a relay server and your main server.
 
-`1. IP-Tables`
-
-`2. GOST`
-
-`3. Dokodemo-Door`
-
-`4. HA-Proxy`
-
-`5. Socat`
+<div align=center>
+ 
+`1. IP-Tables`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`2. GOST`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3. Dokodemo-Door`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`4. HA-Proxy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`5. Socat`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
 
 ## ⚙️ Installation
 In order to create tunnels on your relay server, you just need to run the following command.
@@ -39,7 +34,7 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 </div>
 
 ### 🛠️ IP-Tables Tunnel
-According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it:
+According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it.
 
 <div align=center>
 
@@ -64,7 +59,7 @@ This option clears all rules created for the tunnel and all other rules.
 In order to go back to the main menu press `4` .
 
 ### 🛠️ GOST Tunnel
-According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it:
+According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it.
 
 <div align=center>
  
@@ -81,7 +76,7 @@ According to the 1st picture above, choose number `2` and enter the `GOST Tunnel
 
 `2. Check GOST Port and Status`
 
-After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed to you.
+After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Add Another Port and Domain`
 - You can use this option if you want to tunnel from the relay server to several outside servers.
@@ -98,7 +93,7 @@ In order to go back to the main menu press `5` .
 
 
 ### 🛠️ Dokodemo-door Tunnel
-According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it:
+According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it.
 
 <div align=center>
  
@@ -113,23 +108,26 @@ According to the 1st picture above, choose number `3` and enter the `Dekodemo-do
 - The message `Inbound added and tunnel started` will be displayed.
 
 `2. Check Xray Service Status`
+
 After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
 
 `3. Add another inbound`
 - You can use option `3` in the Dokodemo-door tunnel menu to create another inbound connection and connect your relay server to several external servers.
 - After selecting option `3`, in the `new address section`, enter the `IP address` or the `domain` of your new server, then press `Enter`.
-- Next step, enter the new port in the `new port field` and press `Enter` button. You will see inbound added.
+- Next step, enter the new port in the `new port field` and press `Enter` button.
+- The message `Another inbound added` will be displayed.
 - You can enter option number `2` to ensure that the previous steps are correctly done and to check the used ports and to see if the tunnel is activated.
 
 
 `4. Uninstall Xray and Dokodemo-Door tunnel`
+
 Choose this option to remove Dokodemo-door tunnel and Xray core from your relay server.
 
 `5. Back to Main Menu`
 In order to go back to the main menu press `5`.
 
 ### 🛠️ HA-Proxy Tunnel
-According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it:
+According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it.
 
 <div align=center>
 
@@ -142,7 +140,7 @@ According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tu
 - After installation, in the `Relay port section`, enter the desired port in your relay server (recommended port 443)
 - Then enter the IP address of your main server in the Enter Main-Server IP field.
 - Then, in the Enter Main-Server Port section, enter the port freed on your main and external server (e.g. by default, Hiddify Manager uses port 443, and it is recommended to use this port).
-- After the correct operation, the message `HA-Proxy tunnel is installed and activated successfully!` will be displayed on the screen.
+- After the correct operation, the message `HA-Proxy tunnel is installed and activated.` will be displayed on the screen.
 
 `2. Check HA-Proxy Ports and Status`
 After selecting option `2`, the ports used in the tunnel and the status of the tunnel will be displayed on the screen.
@@ -155,7 +153,7 @@ In order to go back to the main menu press `4`.
 
 
 ### 🛠️ Socat Tunnel
-According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it:
+According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it.
 
 <div align=center>
 
@@ -167,7 +165,7 @@ According to the 1st picture above, choose number `5` and enter the `Socat Tunne
 
 - After selecting option `1`, wait for the installation of the Socat package.
 - Then enter the `IP` and `Port` of main server.
-- After the correct operation, the message `Socat tunnel is installed and activated successfully!` will be displayed on the screen.
+- After the correct operation, the message `Socat tunnel is installed and activated.` will be displayed on the screen.
   
 `2. Check Socat Port`
 After selecting option `2`, the ports used in the tunnel will be displayed on the screen.
