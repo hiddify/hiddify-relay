@@ -460,7 +460,7 @@ uninstall_wstunnel() {
     sudo systemctl disable wstunnel.service
     sudo rm -f /etc/systemd/system/wstunnel.service /bin/wstunnel
     clear
-    echo "\e[31mWstunnel service uninstalled From tunnel server.\e[0m"
+    echo -e "\e[31mWstunnel service uninstalled From tunnel server.\e[0m"
     echo "Use ssh to uninstall Wstunnel form main server"
     read -p "Enter the IP of the main server: " main_server_ip
     read -p "Enter the user of the main server: " ssh_user
