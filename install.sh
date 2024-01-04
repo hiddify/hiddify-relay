@@ -368,6 +368,118 @@ uninstall_socat() {
     echo "-------------------------------------------------------"
 }
 
+# Function to install wstunnel and setup wstunnel service
+install_wstunnel() {
+    echo "Installing wstunnel..."
+    wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64"
+    sudo chmod +x wstunnel-linux-x64
+    sudo mv wstunnel-linux-x64 /bin/wstunnel
+
+    # Download service file for Iran server
+    sudo rm /etc/systemd/system/wstunnel.service
+    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnels.service
+    clear
+    # Prompt for port and domain
+    read -p "Enter the traffic port use for wstunnel(like 443 or any port): " mport
+    read -p "Enter the domain for wstunnel: " domain
+    read -p "Enter the port for wstunnel: " port
+
+    sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service
+
+    # Start wstunnel service
+    sudo systemctl daemon-reload
+    sudo systemctl enable wstunnel.service
+    sudo systemctl start wstunnel.service
+    clear
+    echo "Now make ssh to main server for setup wstunnel"
+
+    read -p "Enter the IP of the main server: " main_server_ip
+    read -p "Enter the user of the main server: " ssh_user
+    read -p "Enter the SSH port of the main server (press Enter for default 22): " main_server_port
+    main_server_port=${main_server_port:-22}
+
+    read -p "Enter the port used for wstunnel: " port
+
+    # Download wstunnelm.service and modify the port
+    wget -O wstunnelm.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnelm.service
+    sed -i "s/\$port/$port/g" wstunnelm.service
+    clear
+    # Send the modified service file to the main server
+    scp -P $main_server_port wstunnelm.service $ssh_user@$main_server_ip:/tmp/wstunnelm.service
+    clear
+    echo "The service file sent to main server."
+    echo "once again type main server Password:"
+    # SSH to the main server and replace the wstunnel service file
+    ssh -p $main_server_port $ssh_user@$main_server_ip << 'ENDSSH'
+    sudo mv /tmp/wstunnelm.service /etc/systemd/system/wstunnel.service
+    wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64"
+    sudo chmod +x wstunnel-linux-x64
+    sudo mv wstunnel-linux-x64 /bin/wstunnel
+    sudo systemctl daemon-reload
+    sudo systemctl enable wstunnel.service
+    sudo systemctl start wstunnel.service
+ENDSSH
+
+    clear
+    # Check Wstunnel service status
+    status=$(sudo systemctl is-active wstunnel.service)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------Wstunnel service status---------------------"
+        echo -e "\e[32mWstunnel service is $status and running.\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------Wstunnel service status---------------------"
+        echo -e "\e[31mWstunnel service is not active or failed.\e[0m"
+        echo "-------------------------------------------------------"
+    fi
+}
+
+check_wstunnel_port() {
+    # Check port in use
+    echo "---------------------Port in use---------------------------"
+    sudo lsof -i -P -n -sTCP:LISTEN | grep wstunnel | awk '{print "TCP:", $9}'
+
+    # Check Wstunnel service status
+    status=$(sudo systemctl is-active wstunnel.service)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------Wstunnel service status---------------------"
+        echo -e "\e[32mWstunnel Service Status: $status\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------Wstunnel service status---------------------"
+        echo -e "\e[31mWstunnel Service Status: $status\e[0m"
+        echo "-------------------------------------------------------"
+    fi
+}
+
+uninstall_wstunnel() {
+    echo "Uninstalling wstunnel..."
+    sudo systemctl stop wstunnel.service
+    sudo systemctl disable wstunnel.service
+    sudo rm -f /etc/systemd/system/wstunnel.service /bin/wstunnel
+    clear
+    echo "\e[31mWstunnel service uninstalled From tunnel server.\e[0m"
+    echo "Use ssh to uninstall Wstunnel form main server"
+    read -p "Enter the IP of the main server: " main_server_ip
+    read -p "Enter the user of the main server: " ssh_user
+    read -p "Enter the SSH port of the main server (press Enter for default 22): " main_server_port
+    main_server_port=${main_server_port:-22}
+
+    # SSH to the main server and execute commands
+    ssh -p $main_server_port $ssh_user@$main_server_ip bash -s << 'ENDSSH'
+    sudo systemctl stop wstunnel.service
+    sudo systemctl disable wstunnel.service
+    sudo rm -f /etc/systemd/system/wstunnel.service /bin/wstunnel
+ENDSSH
+    clear
+    echo "-----------------------------------------"
+    echo -e "\e[31mWstunnel Service Uninstalled.\e[0m"
+    echo "-----------------------------------------"
+}
+
+
 # Functionality for iptables menu
 iptables_menu() {
     clear
@@ -487,6 +599,28 @@ done
     clear
 }
 
+# Functionality for WSTunnel menu
+wstunnel_menu() {
+    clear
+while true; do
+    echo "WSTunnel Menu:"
+    echo -e "\e[1;32m1. Install and configure wstunnel on both server\e[0m"
+    echo -e "\e[1;34m2. Check wstunnel service and port\e[0m"
+    echo -e "\e[1;31m3. Uninstall wstunnel from both server\e[0m"
+    echo -e "\e[1;33m4. Back To Main Menu\e[0m"
+    read -p "Enter your choice: " choice
+
+    case $choice in
+        1) install_wstunnel ;;
+        2) check_wstunnel_port ;;
+        3) uninstall_wstunnel ;;
+        4) break ;;
+        *) echo "Invalid option. Please select again." ;;
+    esac
+done
+    clear
+}
+
 # Main Menu
 while true; do
     echo "Main Menu:"
@@ -495,7 +629,8 @@ while true; do
     echo "3. Dokodemo-Door Tunnel"
     echo "4. HA-Proxy Tunnel"
     echo "5. Socat Tunnel"
-    echo "6. Exit"
+    echo "6. Websocket Tunnel"
+    echo "7. Exit"
 
     read -p "Enter your choice: " main_choice
 
@@ -505,7 +640,8 @@ while true; do
         3) xray_menu ;;
         4) haproxy_menu ;;
         5) socat_menu ;;
-        6) echo "Exiting..."; break ;;
+        6) wstunnel_menu ;;
+        7) echo "Exiting..."; break ;;
         *) echo "Invalid option. Please select again." ;;
     esac
 done
