@@ -497,7 +497,7 @@ while true; do
     echo "5. Socat Tunnel"
     echo "6. Exit"
 
-    read -p "Enter your choice: " main_choice
+    read -p "Enter Your Choice: " main_choice
 
     case $main_choice in
         1) iptables_menu ;;
