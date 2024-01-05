@@ -84,13 +84,24 @@ install_gost() {
     echo "-----------------------------------------"
     echo -e "\e[32mGost tunnel is installed and activated.\e[0m"
     echo "-----------------------------------------"
+    status=$(sudo systemctl is-active gost)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------GOST service status---------------------"
+        echo -e "\e[32mGost tunnel is installed and $status.\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------GOST service status---------------------"
+        echo -e "\e[31mGOST service is not active or failed.\e[0m"
+        echo "-------------------------------------------------------"
+    fi
 }
 
 check_port_gost() {
     # Check port in use
     echo "---------------------Port in use---------------------------"
     sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print "TCP:", $9}'
-
+    echo "-----------------------------------------------------------"
     # Check GOST service status
     status=$(sudo systemctl is-active gost)
 
@@ -185,10 +196,19 @@ EOF
 )
 
     echo "$inbound_config" > /usr/local/etc/xray/config.json
-    echo "--------------------------status-------------------------------"
-    echo "Inbound added and tunnel started"
+
     sudo systemctl restart xray
-    echo "---------------------------------------------------------------"
+    status=$(sudo systemctl is-active xray)
+    
+    if [ "$status" = "active" ]; then
+        echo "---------------Dokodemo-Door service status---------------------"
+        echo -e "\e[32mXray tunnel is installed and $status.\e[0m"
+        echo "----------------------------------------------------------------"
+    else
+        echo "---------------Dokodemo-Door service status---------------------"
+        echo -e "\e[31mXray service is not active or failed.\e[0m"
+        echo "----------------------------------------------------------------"
+    fi
 
 }
 
@@ -271,27 +291,36 @@ install_haproxy() {
     echo "Restarting HA-Proxy..."
     sudo systemctl restart haproxy
     clear
-    echo "-----------------------------------------"
-    echo "HA-Proxy tunnel is installed and activated"
-    echo "-----------------------------------------"
+
+    status=$(sudo systemctl is-active haproxy)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------HA-Proxy service status---------------------"
+        echo -e "\e[32mHA-Proxy tunnel is installed and $status.\e[0m"
+        echo "-----------------------------------------------------------"
+    else
+        echo "---------------HA-Proxy service status---------------------"
+        echo -e "\e[31mHA-Proxy service is not active or failed.\e[0m"
+        echo "-----------------------------------------------------------"
+    fi
 }
 
 check_haproxy() {
     # Check port in use
     echo "---------------------Port in use---------------------------"
     sudo lsof -i -P -n -sTCP:LISTEN | grep haproxy | awk '{print "TCP:", $9}'
-
+    echo "-----------------------------------------------------------"
     # Check haproxy service status
     status=$(sudo systemctl is-active haproxy)
 
     if [ "$status" = "active" ]; then
         echo "---------------HA-Proxy service status---------------------"
         echo -e "\e[32mHA-Proxy Service Status: $status\e[0m"
-        echo "--------------------------------------------"
+        echo "-----------------------------------------------------------"
     else
         echo "---------------HA-Proxy service status---------------------"
         echo -e "\e[31mHA-Proxy Service Status: $status\e[0m"
-        echo "-------------------------------------------------------"
+        echo "-----------------------------------------------------------"
     fi
 }
 
@@ -331,9 +360,17 @@ install_socat() {
     sudo systemctl enable socat
     sudo systemctl start socat
     clear
-    echo "-------------------------------------------"
-    echo "Socat tunnel is installed and activated."
-    echo "-------------------------------------------"
+    status=$(sudo systemctl is-active socat)
+
+    if [ "$status" = "active" ]; then
+        echo "---------------socat service status---------------------"
+        echo -e "\e[32mSocat tunnel is installed and $status.\e[0m"
+        echo "--------------------------------------------"
+    else
+        echo "---------------socat service status---------------------"
+        echo -e "\e[31msocat service is not active or failed.\e[0m"
+        echo "-------------------------------------------------------"
+    fi
 }
 
 # Function to check port used by Socat
@@ -341,7 +378,7 @@ check_socat_port() {
     # Check port in use
     echo "---------------------Port in use---------------------------"
     sudo lsof -i -P -n -sTCP:LISTEN | grep socat | awk '{print "TCP:", $9}'
-
+    echo "-----------------------------------------------------------"
     # Check socat service status
     status=$(sudo systemctl is-active socat)
 
@@ -380,9 +417,9 @@ install_wstunnel() {
     wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnels.service
     clear
     # Prompt for port and domain
-    read -p "Enter the traffic port use for wstunnel(like 443 or any port): " mport
-    read -p "Enter the domain for wstunnel: " domain
-    read -p "Enter the port for wstunnel: " port
+    read -p "Enter the port use for traffic(like 443 or any port): " mport
+    read -p "Enter the Main-Server domain: " domain
+    read -p "Enter the port used for wstunnel: " port
 
     sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service
 
@@ -427,11 +464,11 @@ ENDSSH
     if [ "$status" = "active" ]; then
         echo "---------------Wstunnel service status---------------------"
         echo -e "\e[32mWstunnel service is $status and running.\e[0m"
-        echo "--------------------------------------------"
+        echo "-----------------------------------------------------------"
     else
         echo "---------------Wstunnel service status---------------------"
         echo -e "\e[31mWstunnel service is not active or failed.\e[0m"
-        echo "-------------------------------------------------------"
+        echo "-----------------------------------------------------------"
     fi
 }
 
@@ -439,18 +476,18 @@ check_wstunnel_port() {
     # Check port in use
     echo "---------------------Port in use---------------------------"
     sudo lsof -i -P -n -sTCP:LISTEN | grep wstunnel | awk '{print "TCP:", $9}'
-
+    echo "-----------------------------------------------------------"
     # Check Wstunnel service status
     status=$(sudo systemctl is-active wstunnel.service)
 
     if [ "$status" = "active" ]; then
         echo "---------------Wstunnel service status---------------------"
         echo -e "\e[32mWstunnel Service Status: $status\e[0m"
-        echo "--------------------------------------------"
+        echo "-----------------------------------------------------------"
     else
         echo "---------------Wstunnel service status---------------------"
         echo -e "\e[31mWstunnel Service Status: $status\e[0m"
-        echo "-------------------------------------------------------"
+        echo "-----------------------------------------------------------"
     fi
 }
 
