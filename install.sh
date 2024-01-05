@@ -148,8 +148,6 @@ uninstall_gost() {
 # Functions for Xray setup
 install_xray() {
     sudo bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-    sudo apt-get install jq
-    sudo rm /usr/local/etc/xray/config.json
     clear
     echo "---------------------------------------------------------------"
     echo -e "\e[32mXray installed and now add inbound\e[0m"
@@ -159,13 +157,45 @@ install_xray() {
     echo -e "\e[1;32mEnter the port: \e[0m"
     read -e port
 
-    wget -O /usr/local/etc/xray/config.json https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/config.json
+    inbound_config=$(cat <<EOF
+{
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 62789,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "api"
+    },
+    {
+      "listen": null,
+      "port": $port,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "$address",
+        "followRedirect": false,
+        "network": "tcp,udp",
+        "port": $port
+      },
+      "tag": "inbound-1"
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "blocked"
+    }
+  ]
+}
+EOF
+)
 
-    config_file="/usr/local/etc/xray/config.json"
-
-    jq --arg address "$address" --arg port "$port" \
-    '.inbounds[] | select(.protocol == "dokodemo-door") | .settings.address = $address | .port = ($port | tonumber)' \
-    "$config_file" > temp_config.json && mv temp_config.json "$config_file"
+    echo "$inbound_config" > /usr/local/etc/xray/config.json
 
     sudo systemctl restart xray
     status=$(sudo systemctl is-active xray)
@@ -304,7 +334,7 @@ uninstall_haproxy() {
     echo "-------------------------------------------------------"
 }
 
-
+# Function to install Socat and setup tunnel service
 install_socat() {
     # Check if Socat is installed
     if ! command -v socat &> /dev/null; then
@@ -343,7 +373,7 @@ install_socat() {
     fi
 }
 
-
+# Function to check port used by Socat
 check_socat_port() {
     # Check port in use
     echo "---------------------Port in use---------------------------"
