@@ -148,6 +148,7 @@ uninstall_gost() {
 # Functions for Xray setup
 install_xray() {
     sudo bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+    sudo rm /usr/local/etc/xray/config.json
     clear
     echo "---------------------------------------------------------------"
     echo -e "\e[32mXray installed and now add inbound\e[0m"
@@ -157,45 +158,10 @@ install_xray() {
     echo -e "\e[1;32mEnter the port: \e[0m"
     read -e port
 
-    inbound_config=$(cat <<EOF
-{
-  "inbounds": [
-    {
-      "listen": "127.0.0.1",
-      "port": 62789,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "127.0.0.1"
-      },
-      "tag": "api"
-    },
-    {
-      "listen": null,
-      "port": $port,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "$address",
-        "followRedirect": false,
-        "network": "tcp,udp",
-        "port": $port
-      },
-      "tag": "inbound-1"
-    }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom"
-    },
-    {
-      "protocol": "blackhole",
-      "tag": "blocked"
-    }
-  ]
-}
-EOF
-)
+    wget -O /usr/local/etc/xray/config.json https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/config.json
 
-    echo "$inbound_config" > /usr/local/etc/xray/config.json
+    # Modify the downloaded config.json with entered domain and port
+    sudo sed -i -E "s/(\"address\": \")[^\"]+/\1$domain/; s/(\"port\": )[0-9]+/\1$port/" /usr/local/etc/xray/config.json
 
     sudo systemctl restart xray
     status=$(sudo systemctl is-active xray)
