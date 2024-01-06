@@ -1,0 +1,12 @@
+[Unit]
+Description=wstunnel
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/bin
+ExecStart= wstunnel -L 0.0.0.0:$mport:localhost:$mport ws://$domain:$port
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -34,6 +34,8 @@ bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/
 </div>
 
 ### 🛠️ IP-Tables Tunnel
+<details>
+  <summary>Click for IP-Tables Tunnel details</summary>
 According to the 1st picture above, choose number `1` and enter the `IP-Tables tunnel` to manage it.
 
 <div align=center>
@@ -57,8 +59,11 @@ This option clears all rules created for the tunnel and all other rules.
 
 `4. Back to Main Menu`
 In order to go back to the main menu press `4` .
+</details>
 
 ### 🛠️ GOST Tunnel
+<details>
+  <summary>Click for GOST Tunnel details</summary>
 According to the 1st picture above, choose number `2` and enter the `GOST Tunnel` to manage it.
 
 <div align=center>
@@ -90,9 +95,12 @@ This option will remove the GOST tunnel from your relay server.
 `5. Back to Main Menu`
 
 In order to go back to the main menu press `5` .
-
+</details>
 
 ### 🛠️ Dokodemo-door Tunnel
+
+<details>
+  <summary>Click for Dokodemo-door Tunnel details</summary>
 According to the 1st picture above, choose number `3` and enter the `Dekodemo-door Tunnel` to manage it.
 
 <div align=center>
@@ -125,8 +133,12 @@ Choose this option to remove Dokodemo-door tunnel and Xray core from your relay 
 
 `5. Back to Main Menu`
 In order to go back to the main menu press `5`.
+</details>
 
 ### 🛠️ HA-Proxy Tunnel
+
+<details>
+  <summary>Click for HA-Proxy Tunnel details</summary>
 According to the 1st picture above, choose number `4` and enter the `HA-Proxy Tunnel` to manage it.
 
 <div align=center>
@@ -150,9 +162,12 @@ Use this option to remove HA-Proxy tunnel from the relay server.
 
 `4. Back to Main Menu`
 In order to go back to the main menu press `4`.
-
+</details>
 
 ### 🛠️ Socat Tunnel
+
+<details>
+  <summary>Click for Socat Tunnel details</summary>
 According to the 1st picture above, choose number `5` and enter the `Socat Tunnel` to manage it.
 
 <div align=center>
@@ -177,7 +192,7 @@ Use this option to remove Socat tunnel from the relay server.
 
 `4. Back To Main Menu`
 In order to go back to the main menu press `4`.
-
+</details>
 <br>
 
 > [!NOTE]
