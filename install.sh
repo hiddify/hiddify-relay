@@ -1,23 +1,19 @@
 #!/bin/bash
-HEIGHT=20
-WIDTH=60
-CHOICE_HEIGHT=10
-BACKTITLE="Welcome to Hiddify Relay"
-TITLE="Enter your tunnel mode"
-MENU="Choose one of the following options:"
 
-# Functions for iptables setup
+# Define partial functions
+##############################
+## Functions for iptables setup
 install_iptables() {
     read -p 'Enter your main server IP like(1.1.1.1): ' IP
     echo "The main server IP is $IP"
     sudo apt install -y iptables iptables-persistent
     sudo sysctl net.ipv4.ip_forward=1
-    sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports 80,443 -j MASQUERADE 
+    sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports 80,443 -j MASQUERADE
     sudo iptables -t nat -A PREROUTING -p tcp --match multiport --dports 80,443 -j DNAT --to-destination $IP
-    sudo iptables -t nat -A POSTROUTING -p udp -j MASQUERADE 
+    sudo iptables -t nat -A POSTROUTING -p udp -j MASQUERADE
     sudo iptables -t nat -A PREROUTING -p udp -j DNAT --to-destination $IP
 
-    sudo mkdir -p /etc/iptables/ 
+    sudo mkdir -p /etc/iptables/
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
     clear
     echo "---------------------------------------------------------------"
@@ -54,7 +50,8 @@ uninstall_iptables() {
     echo "---------------------------------------------------------------"
 }
 
-# Functions for GOST setup
+##########################
+## Functions for GOST setup
 install_gost() {
 
     # Install required packages
@@ -145,7 +142,8 @@ uninstall_gost() {
     echo "-----------------------------------------"
 }
 
-# Functions for Xray setup
+##########################
+## Functions for Xray setup
 install_xray() {
     sudo bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
     clear
@@ -199,7 +197,7 @@ EOF
 
     sudo systemctl restart xray
     status=$(sudo systemctl is-active xray)
-    
+
     if [ "$status" = "active" ]; then
         echo "---------------Dokodemo-Door service status---------------------"
         echo -e "\e[32mXray tunnel is installed and $status.\e[0m"
@@ -260,7 +258,8 @@ uninstall_xray() {
     echo "---------------------------------------------------------------"
 }
 
-# Functions for HA-Proxy setup
+##############################
+## Functions for HA-Proxy setup
 install_haproxy() {
     # Check if HAProxy is installed
     if ! command -v haproxy &> /dev/null; then
@@ -334,7 +333,8 @@ uninstall_haproxy() {
     echo "-------------------------------------------------------"
 }
 
-# Function to install Socat and setup tunnel service
+####################################################
+## Function to install Socat and setup tunnel service
 install_socat() {
     # Check if Socat is installed
     if ! command -v socat &> /dev/null; then
@@ -405,7 +405,8 @@ uninstall_socat() {
     echo "-------------------------------------------------------"
 }
 
-# Function to install wstunnel and setup wstunnel service
+#########################################################
+## Function to install wstunnel and setup wstunnel service
 install_wstunnel() {
     echo "Installing wstunnel..."
     wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64"
@@ -516,169 +517,281 @@ ENDSSH
     echo "-----------------------------------------"
 }
 
+################################################################
+# Define the functions to be executed when an option is selected
 
-# Functionality for iptables menu
+# Graphical functionality for IP-Tables menu
 iptables_menu() {
-    clear
     while true; do
-        echo "IP-Tables Menu:"
-        echo -e "\e[1;32m1. Install IP-Tables Rules\e[0m"
-        echo -e "\e[1;34m2. Check Ports In Use\e[0m"
-        echo -e "\e[1;31m3. Uninstall IP-Tables Rules\e[0m"
-        echo -e "\e[1;33m4. Back To Main Menu\e[0m"
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "IP-Tables Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install IP-Tables Rules" \
+        "Status" "Check Ports In Use" \
+        "Uninstall" "Uninstall IP-Tables Rules" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-        read -p "Enter Your Choice: " iptables_choice
-
-        case $iptables_choice in
-            1) install_iptables ;;
-            2) check_port_iptables ;;
-            3) uninstall_iptables ;;
-            4) break ;;
-            *) echo "Invalid option. Please select again." ;;
-        esac
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_haproxy
+                    ;;
+                Status)
+                    check_haproxy
+                    ;;
+                Uninstall)
+                    uninstall_haproxy
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
     done
-    clear
 }
 
-# Functionality for GOST menu
+# Graphical functionality for GOST menu
 gost_menu() {
-    clear
     while true; do
-        echo "GOST Menu:"
-        echo -e "1. \e[32mInstall GOST\e[0m"
-        echo -e "2. \e[34mCheck GOST Port And Status\e[0m"
-        echo -e "3. \e[34mAdd Another Port And Domain\e[0m"
-        echo -e "4. \e[31mUninstall GOST\e[0m"
-        echo -e "5. \e[33mBack To Main Menu\e[0m"
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "GOST Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install GOST" \
+        "Status" "Check GOST Port And Status" \
+        "Add" "Add Another Port And Domain" \
+        "Uninstall" "Uninstall GOST" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-        read -p "Enter Your Choice: " gost_choice
-
-        case $gost_choice in
-            1) install_gost ;;
-            2) check_port_gost ;;
-            3) add_port_gost ;;
-            4) uninstall_gost ;;
-            5) break ;;
-            *) echo "Invalid option. Please select again." ;;
-        esac
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_gost
+                    ;;
+                Status)
+                    check_port_gost
+                    ;;
+                Add)
+                    add_port_gost
+                    ;;
+                Uninstall)
+                    uninstall_gost
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
     done
-    clear
 }
 
-# Functionality for Xray menu
-xray_menu() {
-    clear
+# Graphical functionality for Dokodemo menu
+dokodemo_menu() {
     while true; do
-        echo "Dokodemo-Door Menu:"
-        echo -e "\e[1;32m1. Install Xray For Dokodemo-Door And Add Inbound\e[0m"
-        echo -e "\e[1;34m2. Check Xray Service Status\e[0m"
-        echo -e "\e[1;34m3. Add Another Inbound\e[0m"
-        echo -e "\e[1;31m4. Uninstall Xray And Tunnel\e[0m"
-        echo -e "\e[1;33m5. Back To Main Menu\e[0m"
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "Dokodemo-Door Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install Xray For Dokodemo-Door And Add Inbound" \
+        "Status" "Check Xray Service Status" \
+        "Add" "Add Another Inbound" \
+        "Uninstall" "Uninstall Xray And Tunnel" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-        read -p "Enter Your Choice: " xray_choice
-
-        case $xray_choice in
-            1) install_xray ;;
-            2) check_service_xray ;;
-            3) add_another_inbound ;;
-            4) uninstall_xray ;;
-            5) break ;;
-            *) echo "Invalid option. Please select again." ;;
-        esac
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_xray
+                    ;;
+                Status)
+                    check_service_xray
+                    ;;
+                Add)
+                    add_another_inbound
+                    ;;
+                Uninstall)
+                    uninstall_xray
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
     done
-    clear
 }
 
-# Functionality for HAProxy menu
+# Graphical functionality for Socat menu
 haproxy_menu() {
-    clear
     while true; do
-        echo "HA-Proxy Menu:"
-        echo -e "1. \e[32mInstall HA-Proxy\e[0m"
-        echo -e "2. \e[34mCheck HA-Proxy Port and Status\e[0m"
-        echo -e "3. \e[31mUninstall HAProxy\e[0m"
-        echo -e "4. \e[33mBack to Main Menu\e[0m"
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "HA-Proxy Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install HA-Proxy" \
+        "Status" "Check HA-Proxy Port and Status" \
+        "Uninstall" "Uninstall HAProxy" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-        read -p "Enter Your Choice: " haproxy_choice
-
-        case $haproxy_choice in
-            1) install_haproxy ;;
-            2) check_haproxy ;;
-            3) uninstall_haproxy ;;
-            4) break ;;
-            *) echo "Invalid option. Please select again." ;;
-        esac
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_haproxy
+                    ;;
+                Status)
+                    check_haproxy
+                    ;;
+                Uninstall)
+                    uninstall_haproxy
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
     done
-    clear
 }
 
-# Functionality for Socat menu
+# Graphical functionality for Socat menu
 socat_menu() {
-    clear
-while true; do
-    echo "Socat Menu:"
-    echo -e "\e[1;32m1. Install Socat And Setup Tunnel Service\e[0m"
-    echo -e "\e[1;34m2. Check Socat Port\e[0m"
-    echo -e "\e[1;31m3. Uninstall Socat And Remove Tunnel Service\e[0m"
-    echo -e "\e[1;33m4. Back To Main Menu\e[0m"
+    while true; do
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "Socat Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install Socat And Setup Tunnel Service" \
+        "Status" "Check Socat Port" \
+        "Uninstall" "Uninstall Socat And Remove Tunnel Service" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-    read -p "Enter Your Choice: " choice
-
-    case $choice in
-    1) install_socat ;;
-    2) check_socat_port ;;
-    3) uninstall_socat ;;
-    4) break ;;
-    *) echo "Invalid option. Please select again." ;;
-    esac
-done
-    clear
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_socat
+                    ;;
+                Status)
+                    check_socat_port
+                    ;;
+                Uninstall)
+                    uninstall_socat
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
+    done
 }
 
-# Functionality for WSTunnel menu
+# Graphical functionality for WSTunnel menu
 wstunnel_menu() {
-    clear
-while true; do
-    echo "WSTunnel Menu:"
-    echo -e "\e[1;32m1. Install and configure wstunnel on both server\e[0m"
-    echo -e "\e[1;34m2. Check wstunnel service and port\e[0m"
-    echo -e "\e[1;31m3. Uninstall wstunnel from both server\e[0m"
-    echo -e "\e[1;33m4. Back To Main Menu\e[0m"
-    read -p "Enter your choice: " choice
+    while true; do
+        choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "WS-Tunnel Menu" --menu "Please choose one of the following options:" 20 60 10 \
+        "Install" "Install And Configure WS-Tunnel On Both Servers" \
+        "Status" "Check WS-Tunnel Service And Port" \
+        "Uninstall" "Uninstall WS-Tunnel From Both Servers" \
+        "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
-    case $choice in
-        1) install_wstunnel ;;
-        2) check_wstunnel_port ;;
-        3) uninstall_wstunnel ;;
-        4) break ;;
-        *) echo "Invalid option. Please select again." ;;
-    esac
-done
-    clear
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Install)
+                    install_wstunnel
+                    ;;
+                Status)
+                    check_wstunnel_port
+                    ;;
+                Uninstall)
+                    uninstall_wstunnel
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
+    done
 }
 
-# Main Menu
-while true; do
-    echo "Main Menu:"
-    echo "1. IP-Tables Tunnel"
-    echo "2. GOST Tunnel"
-    echo "3. Dokodemo-Door Tunnel"
-    echo "4. HA-Proxy Tunnel"
-    echo "5. Socat Tunnel"
-    echo "6. Websocket Tunnel"
-    echo "7. Exit"
+#################################
+# Define the main graphical menu
+function menu() {
+    while true; do
+        choice=$(whiptail --backtitle "Welcome to Hiddify Relay Builder" --title "Choose Your Tunnel Mode" --menu "Please choose one of the following options:" 20 60 10 \
+        "IP-Tables" "Manage IP-Tables Tunnel" \
+        "GOST" "Manage GOST Tunnel" \
+        "Dokodemo-Door" "Manage Dokodemo-Door Tunnel" \
+        "HA-Proxy" "Manage HA-Proxy Tunnel" \
+        "Socat" "Manage Socat Tunnel" \
+        "WST" "Manage Web Socket Tunnel" \
+        "Quit" "Exit From The Script" 3>&1 1>&2 2>&3)
 
-    read -p "Enter Your Choice: " main_choice
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                IP-Tables)
+                    iptables_menu
+                    ;;
+                GOST)
+                    gost_menu
+                    ;;
+                Dokodemo-Door)
+                    dokodemo_menu
+                    ;;
+                HA-Proxy)
+                    haproxy_menu
+                    ;;
+                Socat)
+                    socat_menu
+                    ;;
+                WST)
+                    wstunnel_menu
+                    ;;
+                Quit)
+                    exit 0
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    exit 1
+                    ;;
+            esac
+        else
+            exit 1
+        fi
+    done
+}
 
-    case $main_choice in
-        1) iptables_menu ;;
-        2) gost_menu ;;
-        3) xray_menu ;;
-        4) haproxy_menu ;;
-        5) socat_menu ;;
-        6) wstunnel_menu ;;
-        7) echo "Exiting..."; break ;;
-        *) echo "Invalid option. Please select again." ;;
-    esac
-done
+# Call the menu function
+menu
