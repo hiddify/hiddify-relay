@@ -19,6 +19,8 @@ install_iptables() {
     echo "---------------------------------------------------------------"
     echo -e "\e[32mIP-Tables configured\e[0m"
     echo "---------------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_port_iptables() {
@@ -37,6 +39,8 @@ check_port_iptables() {
         echo -e "\e[31miptables Service Status: $status\e[0m"
         echo "-------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 uninstall_iptables() {
@@ -48,6 +52,8 @@ uninstall_iptables() {
     echo "---------------------------------------------------------------"
     echo -e "\e[31mIP-Tables rules cleared\e[0m"
     echo "---------------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 ##########################
@@ -92,6 +98,8 @@ install_gost() {
         echo -e "\e[31mGOST service is not active or failed.\e[0m"
         echo "-------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_port_gost() {
@@ -111,6 +119,8 @@ check_port_gost() {
         echo -e "\e[31mGOST Service Status: $status\e[0m"
         echo "-------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 add_port_gost() {
@@ -129,6 +139,8 @@ add_port_gost() {
     echo "-----------------------------------------"
     echo -e "\e[32mNew port and domain added\e[0m"
     echo "-----------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 uninstall_gost() {
@@ -140,6 +152,8 @@ uninstall_gost() {
     echo "-----------------------------------------"
     echo -e "\e[31mGost Service Uninstalled.\e[0m"
     echo "-----------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 ##########################
@@ -207,6 +221,8 @@ EOF
         echo -e "\e[31mXray service is not active or failed.\e[0m"
         echo "----------------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 
 }
 
@@ -224,6 +240,8 @@ check_service_xray() {
         echo -e "\e[31mXray Service Status: $status\e[0m"
     fi
     echo "---------------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 add_another_inbound() {
@@ -246,6 +264,8 @@ add_another_inbound() {
         echo "Error: Could not find the position to add inbound configuration."
         echo "----------------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 uninstall_xray() {
@@ -256,6 +276,8 @@ uninstall_xray() {
     echo "---------------------------------------------------------------"
     echo -e "\e[31mXray Uninstalled\e[0m"
     echo "---------------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 ##############################
@@ -302,6 +324,8 @@ install_haproxy() {
         echo -e "\e[31mHA-Proxy service is not active or failed.\e[0m"
         echo "-----------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_haproxy() {
@@ -321,6 +345,8 @@ check_haproxy() {
         echo -e "\e[31mHA-Proxy Service Status: $status\e[0m"
         echo "-----------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 uninstall_haproxy() {
@@ -331,6 +357,8 @@ uninstall_haproxy() {
     echo "-------------------------------------------------------"
     echo "HA-Proxy Uninstalled."
     echo "-------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 ####################################################
@@ -371,6 +399,8 @@ install_socat() {
         echo -e "\e[31msocat service is not active or failed.\e[0m"
         echo "-------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 # Function to check port used by Socat
@@ -391,6 +421,9 @@ check_socat_port() {
         echo -e "\e[31msocat Service Status: $status\e[0m"
         echo "-------------------------------------------------------"
     fi
+
+# Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 # Function to uninstall Socat
@@ -403,6 +436,8 @@ uninstall_socat() {
     echo "-------------------------------------------------------"
     echo "Socat tunnel Uninstalled."
     echo "-------------------------------------------------------"
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 #########################################################
@@ -471,6 +506,8 @@ ENDSSH
         echo -e "\e[31mWstunnel service is not active or failed.\e[0m"
         echo "-----------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_wstunnel_port() {
@@ -490,6 +527,8 @@ check_wstunnel_port() {
         echo -e "\e[31mWstunnel Service Status: $status\e[0m"
         echo "-----------------------------------------------------------"
     fi
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 uninstall_wstunnel() {
@@ -515,6 +554,10 @@ ENDSSH
     echo "-----------------------------------------"
     echo -e "\e[31mWstunnel Service Uninstalled.\e[0m"
     echo "-----------------------------------------"
+
+    # Wait for user input (press any key to continue)
+    read -n 1 -s -r -p "Press any key to return to the menu..."
+    
 }
 
 ################################################################
