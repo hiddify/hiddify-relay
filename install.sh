@@ -577,13 +577,13 @@ iptables_menu() {
             # Check if the user selected a valid option
             case $choice in
                 Install)
-                    install_haproxy
+                    install_iptables
                     ;;
                 Status)
-                    check_haproxy
+                    check_iptables
                     ;;
                 Uninstall)
-                    uninstall_haproxy
+                    uninstall_iptables
                     ;;
                 Back)
                     menu
