@@ -1,173 +1,159 @@
 #!/bin/bash
+sudo apt update -y
+sudo apt install dialog -y
+sudo apt install whiptail -y
 
 # Define partial functions
 ##############################
 ## Functions for iptables setup
 install_iptables() {
-    read -p 'Enter your main server IP like(1.1.1.1): ' IP
-    echo "The main server IP is $IP"
-    sudo apt install -y iptables iptables-persistent
-    sudo sysctl net.ipv4.ip_forward=1
-    sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports 80,443 -j MASQUERADE
-    sudo iptables -t nat -A PREROUTING -p tcp --match multiport --dports 80,443 -j DNAT --to-destination $IP
-    sudo iptables -t nat -A POSTROUTING -p udp -j MASQUERADE
-    sudo iptables -t nat -A PREROUTING -p udp -j DNAT --to-destination $IP
-
-    sudo mkdir -p /etc/iptables/
-    sudo iptables-save | sudo tee /etc/iptables/rules.v4
+    IP=$(whiptail --inputbox "Enter your main server IP like (1.1.1.1):" 8 60 3>&1 1>&2 2>&3)
+    {
+        echo "10" "Installing iptables..."
+        sudo apt install -y iptables iptables-persistent > /dev/null 2>&1
+        echo "30" "Enabling net.ipv4.ip_forward..."
+        sudo sysctl net.ipv4.ip_forward=1 > /dev/null 2>&1
+        echo "50" "Configuring iptables rules for TCP..."
+        sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports 80,443 -j MASQUERADE > /dev/null 2>&1
+        echo "60" "Configuring iptables rules for TCP DNAT..."
+        sudo iptables -t nat -A PREROUTING -p tcp --match multiport --dports 80,443 -j DNAT --to-destination $IP > /dev/null 2>&1
+        echo "75" "Configuring iptables rules for UDP..."
+        sudo iptables -t nat -A POSTROUTING -p udp -j MASQUERADE > /dev/null 2>&1
+        echo "85" "Configuring iptables rules for UDP DNAT..."
+        sudo iptables -t nat -A PREROUTING -p udp -j DNAT --to-destination $IP > /dev/null 2>&1
+        echo "95" "Creating /etc/iptables/..."
+        sudo mkdir -p /etc/iptables/ > /dev/null 2>&1
+        sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null
+        echo "100" "Starting iptables service..."
+        sudo systemctl start iptables
+    } | dialog --title "IPTables Installation" --gauge "Installing IPTables..." 10 100 0
     clear
-    echo "---------------------------------------------------------------"
-    echo -e "\e[32mIP-Tables configured\e[0m"
-    echo "---------------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    whiptail --title "IPTables Installation" --msgbox "IP-Tables Installation completed." 8 60
 }
 
 check_port_iptables() {
-    echo "----------------- Ports in Use for iptables -------------------"
-    sudo iptables -L -n -v
-    echo "---------------------------------------------------------------"
-
+    ip_ports=$(iptables-save | awk '/-A (PREROUTING|POSTROUTING)/ && /-p tcp -m multiport --dports/ {split($0, parts, "--to-destination "); split(parts[2], dest_port, "[:]"); split(parts[1], src_port, " --dports "); split(src_port[2], port_list, ","); for (i in port_list) { if(dest_port[1] != "") { if (index(port_list[i], " ")) { split(port_list[i], split_port, " "); print dest_port[1], split_port[1] } else print dest_port[1], port_list[i] }}}'
+)
     status=$(sudo systemctl is-active iptables)
-
-    if [ "$status" = "active" ]; then
-        echo "---------------iptables service status---------------------"
-        echo -e "\e[32miptables Service Status: $status\e[0m"
-        echo "--------------------------------------------"
-    else
-        echo "---------------iptables service status---------------------"
-        echo -e "\e[31miptables Service Status: $status\e[0m"
-        echo "-------------------------------------------------------"
-    fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    service_status="iptables Service Status: $status"
+    info="Service Status and Ports in Use:\n$ip_ports\n\n$service_status"
+    whiptail --title "iptables Service Status and Ports" --msgbox "$info" 15 70
 }
 
 uninstall_iptables() {
-    sudo iptables -F
-    sudo iptables -X
-    sudo iptables -t nat -F
-    sudo iptables -t nat -X
-    rm /etc/iptables/rules.v4
-    echo "---------------------------------------------------------------"
-    echo -e "\e[31mIP-Tables rules cleared\e[0m"
-    echo "---------------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    {
+        echo "10" "Flushing iptables rules..."
+        sudo iptables -F > /dev/null 2>&1
+        sleep 1
+        echo "20" "Deleting all user-defined chains..."
+        sudo iptables -X > /dev/null 2>&1
+        sleep 1
+        echo "40" "Flushing NAT table..."
+        sudo iptables -t nat -F > /dev/null 2>&1
+        sleep 1
+        echo "50" "Deleting user-defined chains in NAT table..."
+        sudo iptables -t nat -X > /dev/null 2>&1
+        sleep 1
+        echo "70" "Removing /etc/iptables/rules.v4..."
+        sudo rm /etc/iptables/rules.v4 > /dev/null 2>&1
+        sleep 1
+        echo "80" "Stopping iptables service..."
+        sudo systemctl stop iptables > /dev/null 2>&1
+        sleep 1
+        echo "100" "IPTables Uninstallation completed!"
+    } | dialog --title "IPTables Uninstallation" --gauge "Uninstalling IPTables..." 10 100 0
+    clear
+    whiptail --title "IPTables Uninstallation" --msgbox "IPTables Uninstalled." 8 60
 }
+
 
 ##########################
 ## Functions for GOST setup
 install_gost() {
-
-    # Install required packages
-    sudo apt update
-
-    # Download and install GOST
-    wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
-    gunzip gost-linux-amd64-2.11.5.gz
+    {
+    echo "20"
+    wget -q https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
+    sleep 1
+    echo "40"
+    gunzip -q gost-linux-amd64-2.11.5.gz
+    sleep 1
+    echo "60"
     sudo mv gost-linux-amd64-2.11.5 /usr/local/bin/gost
+    sleep 1
+    echo "80"
     sudo chmod +x /usr/local/bin/gost
-    clear
+    echo "90"
+    sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service
+    sleep 1
+    } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
+    
+    domain=$(whiptail --inputbox "Enter domain:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
 
-    # Download the gost.service file from GitHub
-    sudo wget -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service
-    clear
-    # Prompt user for port number and domain
-    read -p "Enter port number: " port
-    read -p "Enter domain: " domain
+    sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
 
-    # Modify the gost.service file with user input
-    sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service
-
-    # Start and enable the GOST service
-    sudo systemctl start gost
-    sudo systemctl enable gost
-    clear
-    echo "-----------------------------------------"
-    echo -e "\e[32mGost tunnel is installed and activated.\e[0m"
-    echo "-----------------------------------------"
+    sudo systemctl start gost > /dev/null 2>&1
+    sudo systemctl enable gost > /dev/null 2>&1
     status=$(sudo systemctl is-active gost)
 
     if [ "$status" = "active" ]; then
-        echo "---------------GOST service status---------------------"
-        echo -e "\e[32mGost tunnel is installed and $status.\e[0m"
-        echo "--------------------------------------------"
+        whiptail --title "GOST Service Status" --msgbox "Gost tunnel is installed and $status." 8 60
     else
-        echo "---------------GOST service status---------------------"
-        echo -e "\e[31mGOST service is not active or failed.\e[0m"
-        echo "-------------------------------------------------------"
+        whiptail --title "GOST Installation" --msgbox "GOST service is not active or $status." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    clear
 }
 
 check_port_gost() {
-    # Check port in use
-    echo "---------------------Port in use---------------------------"
-    sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print "TCP:", $9}'
-    echo "-----------------------------------------------------------"
-    # Check GOST service status
+    gost_ports=$(sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print $9}')
     status=$(sudo systemctl is-active gost)
-
-    if [ "$status" = "active" ]; then
-        echo "---------------GOST service status---------------------"
-        echo -e "\e[32mGOST Service Status: $status\e[0m"
-        echo "--------------------------------------------"
-    else
-        echo "---------------GOST service status---------------------"
-        echo -e "\e[31mGOST Service Status: $status\e[0m"
-        echo "-------------------------------------------------------"
-    fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    service_status="gost Service Status: $status"
+    info="Service Status and Ports in Use:\n\nPorts in use:\n$gost_ports\n\n$service_status"
+    whiptail --title "gost Service Status and Ports" --msgbox "$info" 15 70
 }
 
 add_port_gost() {
-    # Find last used port for GOST
+
     last_port=$(sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print $9}' | awk -F ':' '{print $NF}' | sort -n | tail -n 1)
 
-    read -p "Enter new port: " new_port
-    read -p "Enter new domain: " new_domain
+    new_domain=$(whiptail --inputbox "Enter domain:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    new_port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
 
-    # Modify the GOST configuration file to add a new port and domain
-    sudo sed -i "/ExecStart/s/$/ -L=tcp:\/\/:$new_port\/$new_domain:$new_port/" /usr/lib/systemd/system/gost.service
-
-    # Restart the GOST service
-    sudo systemctl daemon-reload
-    sudo systemctl restart gost
-    echo "-----------------------------------------"
-    echo -e "\e[32mNew port and domain added\e[0m"
-    echo "-----------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    sudo sed -i "/ExecStart/s/$/ -L=tcp:\/\/:$new_port\/$new_domain:$new_port/" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
+    sudo systemctl daemon-reload > /dev/null 2>&1
+    sudo systemctl restart gost > /dev/null 2>&1
+    whiptail --title "GOST configuration" --msgbox "New domain and port added." 8 60
 }
 
 uninstall_gost() {
-    sudo systemctl stop gost
-    sudo systemctl disable gost
-    sudo systemctl daemon-reload
-    sudo rm -f /usr/lib/systemd/system/gost.service /usr/local/bin/gost
+    {
+        echo "20" "Stopping GOST service..."
+        sudo systemctl stop gost > /dev/null 2>&1
+        sleep 1
+        echo "40" "Disabling GOST service..."
+        sudo systemctl disable gost > /dev/null 2>&1
+        sleep 1
+        echo "60" "Reloading systemctl daemon..."
+        sudo systemctl daemon-reload > /dev/null 2>&1
+        sleep 1
+        echo "80" "Removing GOST service and binary..."
+        sudo rm -f /usr/lib/systemd/system/gost.service /usr/local/bin/gost
+        sleep 1
+    } | dialog --title "GOST Uninstallation" --gauge "Uninstalling GOST..." 10 60 0
     clear
-    echo "-----------------------------------------"
-    echo -e "\e[31mGost Service Uninstalled.\e[0m"
-    echo "-----------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    whiptail --title "GOST Uninstallation" --msgbox "GOST Service Uninstalled." 8 60
 }
 
 ##########################
 ## Functions for Xray setup
+
 install_xray() {
-    sudo bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+    sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install 2>&1 | dialog --title "Xray Installation" --progressbox 30 120
+
+    whiptail --title "Xray Installation" --msgbox "Xray installation completed!" 8 60
     clear
-    echo "---------------------------------------------------------------"
-    echo -e "\e[32mXray installed and now add inbound\e[0m"
-    echo "---------------------------------------------------------------"
-    echo -e "\e[1;32mEnter the address: \e[0m"
-    read -e address
-    echo -e "\e[1;32mEnter the port: \e[0m"
-    read -e port
+    address=$(whiptail --inputbox "Enter the address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
+    port=$(whiptail --inputbox "Enter the port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
     inbound_config=$(cat <<EOF
 {
@@ -213,276 +199,221 @@ EOF
     status=$(sudo systemctl is-active xray)
 
     if [ "$status" = "active" ]; then
-        echo "---------------Dokodemo-Door service status---------------------"
-        echo -e "\e[32mXray tunnel is installed and $status.\e[0m"
-        echo "----------------------------------------------------------------"
+        whiptail --title "Install Xray" --msgbox "Xray installed successfully!" 8 60
     else
-        echo "---------------Dokodemo-Door service status---------------------"
-        echo -e "\e[31mXray service is not active or failed.\e[0m"
-        echo "----------------------------------------------------------------"
+        whiptail --title "Install Xray" --msgbox "Xray service is not active or failed." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 
 }
 
 check_service_xray() {
-    # Check port in use
-    echo "----------------- service status port in use--------------------"
-    sudo lsof -i -P -n -sTCP:LISTEN | grep xray | awk '{print "TCP:", $9}'
-    echo "---------------------------------------------------------------"
-    # Check Xray service status
+    xray_ports=$(sudo lsof -i -P -n -sTCP:LISTEN | grep xray | awk '{print $9}')
+
     status=$(sudo systemctl is-active xray)
-    echo "----------------Dokodemo-Door service status--------------------"
-    if [ "$status" = "active" ]; then
-        echo -e "\e[32mXray Service Status: $status\e[0m"
-    else
-        echo -e "\e[31mXray Service Status: $status\e[0m"
-    fi
-    echo "---------------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    service_status="Xray Service Status: $status"
+
+    info="Service Status and Ports in Use:\n\nPorts in use:\n$xray_ports\n\n$service_status"
+
+    whiptail --title "Xray Service Status and Ports" --msgbox "$info" 15 70
+
 }
 
 add_another_inbound() {
-    echo -e "\e[1;32mEnter the new address: \e[0m"
-    read -e addressnew
-    echo -e "\e[1;32mEnter the new port: \e[0m"
-    read -e portnew
+
+    addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
+    portnew=$(whiptail --inputbox "Enter the new port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
     position=$(grep -n -m 1 '"tag": "inbound-1"' /usr/local/etc/xray/config.json | cut -d ':' -f1)
 
     if [ -n "$position" ]; then
         position=$((position + 1))
         sed -i "${position}i \ \ \ \ },\n \ \ \ {\n \ \ \ \ \ \"listen\": null,\n \ \ \ \ \ \"port\": $portnew,\n \ \ \ \ \ \"protocol\": \"dokodemo-door\",\n \ \ \ \ \ \"settings\": {\n \ \ \ \ \ \ \ \"address\": \"$addressnew\",\n \ \ \ \ \ \ \ \"followRedirect\": false,\n \ \ \ \ \ \ \ \"network\": \"tcp,udp\",\n \ \ \ \ \ \ \ \"port\": $portnew\n \ \ \ \ \ },\n \ \ \ \ \ \"tag\": \"inbound-$portnew\"" /usr/local/etc/xray/config.json
-        echo "---------------------------------------------------------------"
-        echo "Additional inbound added."
+        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
         sudo systemctl restart xray
-        echo "---------------------------------------------------------------"
     else
-        echo "----------------------------------------------------------------"
-        echo "Error: Could not find the position to add inbound configuration."
-        echo "----------------------------------------------------------------"
+        whiptail --title "Install Xray" --msgbox "Error: Could not find the position to add inbound configuration." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
-
 uninstall_xray() {
-    sudo rm /usr/local/etc/xray/config.json
-    sudo systemctl stop xray && systemctl disable xray
-    bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove
+    (
+    echo "10" "Removing Xray configuration..."
+    sudo rm /usr/local/etc/xray/config.json > /dev/null 2>&1
+    sleep 1
+    echo "30" "Stopping and disabling Xray service..."
+    sudo systemctl stop xray && sudo systemctl disable xray > /dev/null 2>&1
+    sleep 1
+    echo "70" "Uninstalling Xray..."
+    sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove > /dev/null 2>&1
+    sleep 1
+    echo "100" "Xray Uninstallation completed!"
+    sleep 1
+    ) | dialog --title "Xray Uninstallation" --gauge "Xray Uninstallation in progress..." 10 100 0
+    whiptail --title "Xray Uninstallation" --msgbox "Xray Uninstallation completed!" 8 60
     clear
-    echo "---------------------------------------------------------------"
-    echo -e "\e[31mXray Uninstalled\e[0m"
-    echo "---------------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 ##############################
 ## Functions for HA-Proxy setup
 install_haproxy() {
-    # Check if HAProxy is installed
-    if ! command -v haproxy &> /dev/null; then
-        # If not installed, install HAProxy
-        sudo apt-get install haproxy -y
-    else
-        echo "HAProxy is already installed."
-    fi
+    {
+        echo "10" "Install HAProxy"
+        sudo apt-get install haproxy -y > /dev/null 2>&1
+        sleep 1
+        echo "30" "Downloading haproxy.cfg..."
+        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg" > /dev/null 2>&1
+        sleep 1
+        echo "50" "Removing existing haproxy.cfg..."
+        sudo rm /etc/haproxy/haproxy.cfg > /dev/null 2>&1
+        sleep 1
+        echo "70" "Moving new haproxy.cfg to /etc/haproxy..."
+        sudo mv /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg
+        sleep 1
+    } | dialog --title "HAProxy Installation" --gauge "Installing HAProxy..." 10 60 0
 
-    # Download haproxy.cfg from GitHub
-    wget -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg"
+    whiptail --title "HAProxy Installation" --msgbox "HAProxy installation completed." 8 60
 
-    # Remove existing haproxy.cfg
-    sudo rm /etc/haproxy/haproxy.cfg
+    target_iport=$(whiptail --inputbox "Enter Relay-Server Free Port:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+    target_ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+    target_port=$(whiptail --inputbox "Enter Main-Server Port:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
 
-    # Move downloaded haproxy.cfg to /etc/haproxy
-    sudo mv /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg
+    sudo sed -i "s/\$iport/$target_iport/g; s/\$IP/$target_ip/g; s/\$port/$target_port/g" /etc/haproxy/haproxy.cfg > /dev/null 2>&1
 
-    # Replace $IP and $port in haproxy.cfg
-    clear
-    read -p "Enter Relay-Server Free Port: " target_iport
-    read -p "Enter Main-Server IP: " target_ip
-    read -p "Enter Main-Server Port: " target_port
-
-    sudo sed -i "s/\$iport/$target_iport/g; s/\$IP/$target_ip/g; s/\$port/$target_port/g" /etc/haproxy/haproxy.cfg
-
-    # Restart HA-Proxy
-    echo "Restarting HA-Proxy..."
-    sudo systemctl restart haproxy
-    clear
+    sudo systemctl restart haproxy > /dev/null 2>&1
 
     status=$(sudo systemctl is-active haproxy)
-
     if [ "$status" = "active" ]; then
-        echo "---------------HA-Proxy service status---------------------"
-        echo -e "\e[32mHA-Proxy tunnel is installed and $status.\e[0m"
-        echo "-----------------------------------------------------------"
+        whiptail --title "HAProxy Installation" --msgbox "HA-Proxy tunnel is installed and $status." 8 60
     else
-        echo "---------------HA-Proxy service status---------------------"
-        echo -e "\e[31mHA-Proxy service is not active or failed.\e[0m"
-        echo "-----------------------------------------------------------"
+        whiptail --title "HAProxy Installation" --msgbox "HA-Proxy service is not active or $status." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_haproxy() {
-    # Check port in use
-    echo "---------------------Port in use---------------------------"
-    sudo lsof -i -P -n -sTCP:LISTEN | grep haproxy | awk '{print "TCP:", $9}'
-    echo "-----------------------------------------------------------"
-    # Check haproxy service status
+    haproxy_ports=$(sudo lsof -i -P -n -sTCP:LISTEN | grep haproxy | awk '{print $9}')
     status=$(sudo systemctl is-active haproxy)
-
-    if [ "$status" = "active" ]; then
-        echo "---------------HA-Proxy service status---------------------"
-        echo -e "\e[32mHA-Proxy Service Status: $status\e[0m"
-        echo "-----------------------------------------------------------"
-    else
-        echo "---------------HA-Proxy service status---------------------"
-        echo -e "\e[31mHA-Proxy Service Status: $status\e[0m"
-        echo "-----------------------------------------------------------"
-    fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    service_status="haproxy Service Status: $status"
+    info="Service Status and Ports in Use:\n\nPorts in use:\n$haproxy_ports\n\n$service_status"
+    whiptail --title "haproxy Service Status and Ports" --msgbox "$info" 15 70
 }
 
 uninstall_haproxy() {
-    sudo systemctl stop haproxy
-    sudo systemctl disable haproxy
-    sudo apt-get remove --purge haproxy -y
+    {
+        echo "20" "Stopping HAProxy service..."
+        sudo systemctl stop haproxy > /dev/null 2>&1
+        sleep 1
+        echo "40" "Disabling HAProxy service..."
+        sudo systemctl disable haproxy > /dev/null 2>&1
+        sleep 1
+        echo "60" "Removing HAProxy..."
+        sudo apt-get remove --purge haproxy -y > /dev/null 2>&1
+        sleep 1
+    } | dialog --title "HAProxy Uninstallation" --gauge "Uninstalling HAProxy..." 10 60 0
+
+    whiptail --title "HAProxy Uninstallation" --msgbox "HA-Proxy Uninstalled." 8 60
     clear
-    echo "-------------------------------------------------------"
-    echo "HA-Proxy Uninstalled."
-    echo "-------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
+
 
 ####################################################
 ## Function to install Socat and setup tunnel service
 install_socat() {
-    # Check if Socat is installed
-    if ! command -v socat &> /dev/null; then
-        # If not installed, install Socat
-        sudo apt-get install socat -y
-    else
-        echo "Socat is already installed."
-    fi
+    {
+    echo "40" "Install Socat"
+    sudo apt-get install socat -y > /dev/null 2>&1
+    sleep 1
+    echo "80" "Downloading Socat.service..."
+    sudo wget -O /etc/systemd/system/socat.service "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/socat-tunnel.service" > /dev/null 2>&1
+    sleep 1
+    } | dialog --title "Socat Installation" --gauge "Installing Socat..." 10 60 0
 
-    # Clone the service file from GitHub to /etc/systemd/system/
-    sudo wget -O /etc/systemd/system/socat.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/socat-tunnel.service
+    whiptail --title "Socat Installation" --msgbox "Socat installation completed." 8 60
     clear
-    # Get user input for $ip and $port
-    read -p "Enter Main-Server IP: " ip
-    read -p "Enter Main-Server Port: " port
+    ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
+    port=$(whiptail --inputbox "Enter Main-Server Port:" 8 60 --title "Enter Port" 3>&1 1>&2 2>&3)
 
-    # Replace variables in the service file
-    sudo sed -i "s/\$ip/$ip/g" /etc/systemd/system/socat.service
-    sudo sed -i "s/\$port/$port/g" /etc/systemd/system/socat.service
+    sudo sed -i "s/\$ip/$ip/g" /etc/systemd/system/socat.service > /dev/null 2>&1
+    sudo sed -i "s/\$port/$port/g" /etc/systemd/system/socat.service > /dev/null 2>&1
 
-    # Reload systemd and start the service
-    sudo systemctl daemon-reload
-    sudo systemctl enable socat
-    sudo systemctl start socat
-    clear
+    sudo systemctl daemon-reload > /dev/null 2>&1
+    sudo systemctl enable socat > /dev/null 2>&1
+    sudo systemctl start socat > /dev/null 2>&1
+
     status=$(sudo systemctl is-active socat)
-
     if [ "$status" = "active" ]; then
-        echo "---------------socat service status---------------------"
-        echo -e "\e[32mSocat tunnel is installed and $status.\e[0m"
-        echo "--------------------------------------------"
+        whiptail --title "Socat Installation" --msgbox "Socat tunnel is installed and $status." 8 60
     else
-        echo "---------------socat service status---------------------"
-        echo -e "\e[31msocat service is not active or failed.\e[0m"
-        echo "-------------------------------------------------------"
+        whiptail --title "Socat Installation" --msgbox "Socat service is not active or $status." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
-# Function to check port used by Socat
 check_socat_port() {
-    # Check port in use
-    echo "---------------------Port in use---------------------------"
-    sudo lsof -i -P -n -sTCP:LISTEN | grep socat | awk '{print "TCP:", $9}'
-    echo "-----------------------------------------------------------"
-    # Check socat service status
+    socat_ports=$(sudo lsof -i -P -n -sTCP:LISTEN | grep socat | awk '{print $9}')
     status=$(sudo systemctl is-active socat)
-
-    if [ "$status" = "active" ]; then
-        echo "---------------socat service status---------------------"
-        echo -e "\e[32msocat Service Status: $status\e[0m"
-        echo "--------------------------------------------"
-    else
-        echo "---------------socat service status---------------------"
-        echo -e "\e[31msocat Service Status: $status\e[0m"
-        echo "-------------------------------------------------------"
-    fi
-
-# Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    service_status="socat Service Status: $status"
+    info="Service Status and Ports in Use:\n\nPorts in use:\n$socat_ports\n\n$service_status"
+    whiptail --title "Socat Service Status and Ports" --msgbox "$info" 15 70
+    clear
 }
 
-# Function to uninstall Socat
 uninstall_socat() {
-    sudo systemctl stop socat
-    sudo systemctl disable socat
-    sudo rm /etc/systemd/system/socat.service
-    sudo apt-get remove socat -y
+    (
+        sudo systemctl stop socat > /dev/null 2>&1 && echo "25" && sleep 1 &&
+        sudo systemctl disable socat > /dev/null 2>&1 && echo "50" && sleep 1 &&
+        sudo rm /etc/systemd/system/socat.service && echo "75" && sleep 1 && > /dev/null 2>&1
+        sudo apt-get remove socat -y > /dev/null 2>&1 && echo "Socat tunnel Uninstalled."
+    ) | dialog --title "Socat Uninstallation" --gauge "Uninstalling Socat..." 10 60
+    whiptail --title "Socat Uninstallation" --msgbox "Socat tunnel Uninstalled." 8 60
     clear
-    echo "-------------------------------------------------------"
-    echo "Socat tunnel Uninstalled."
-    echo "-------------------------------------------------------"
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 #########################################################
 ## Function to install wstunnel and setup wstunnel service
 install_wstunnel() {
-    echo "Installing wstunnel..."
-    wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64"
-    sudo chmod +x wstunnel-linux-x64
-    sudo mv wstunnel-linux-x64 /bin/wstunnel
-
-    # Download service file for Iran server
-    sudo rm /etc/systemd/system/wstunnel.service
-    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnels.service
+    {
+    echo "20"
+    wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64" > /dev/null 2>&1
+    sleep 1
+    echo "40"
+    sudo chmod +x wstunnel-linux-x64 > /dev/null 2>&1
+    sleep 1
+    echo "60"
+    sudo mv wstunnel-linux-x64 /bin/wstunnel > /dev/null 2>&1
+    sleep 1
+    echo "80"
+    sudo rm /etc/systemd/system/wstunnel.service > /dev/null 2>&1
+    sleep 1
+    echo "90"
+    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnels.service > /dev/null 2>&1
+    sleep 1
+    } | dialog --title "Wstunnel Installation" --gauge "Installing Wstunnel..." 10 60
+    whiptail --title "wstunnel Installation" --msgbox "wstunnel installation completed." 8 60
     clear
-    # Prompt for port and domain
-    read -p "Enter the port use for traffic(like 443 or any port): " mport
-    read -p "Enter the Main-Server domain: " domain
-    read -p "Enter the port used for wstunnel: " port
+    mport=$(whiptail --inputbox "Enter the port use for traffic(like 443 or any port):" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
+    domain=$(whiptail --inputbox "Enter the Main-Server domain:" 8 60 --title "Enter domain" 3>&1 1>&2 2>&3)
+    port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
 
-    sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service
+    sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service > /dev/null 2>&1
 
-    # Start wstunnel service
-    sudo systemctl daemon-reload
-    sudo systemctl enable wstunnel.service
-    sudo systemctl start wstunnel.service
+    sudo systemctl daemon-reload > /dev/null 2>&1
+    sudo systemctl enable wstunnel.service > /dev/null 2>&1
+    sudo systemctl start wstunnel.service > /dev/null 2>&1
     clear
-    echo "Now make ssh to main server for setup wstunnel"
+    whiptail --title "wstunnel Installation" --msgbox "Now make ssh to main server for setup wstunnel." 8 60
 
-    read -p "Enter the IP of the main server: " main_server_ip
-    read -p "Enter the user of the main server: " ssh_user
-    read -p "Enter the SSH port of the main server (press Enter for default 22): " main_server_port
+    main_server_ip=$(whiptail --inputbox "Enter the IP of the main server:" 8 60 --title "Enter the main server IP" 3>&1 1>&2 2>&3)
+    ssh_user=$(whiptail --inputbox "Enter the user of the main server:" 8 60 --title "Enter the user" 3>&1 1>&2 2>&3)
+    main_server_port=$(whiptail --inputbox "Enter the SSH port of the main server (press Enter for default 22): " 8 60 --title "Enter the SSH port" 3>&1 1>&2 2>&3)
     main_server_port=${main_server_port:-22}
 
-    read -p "Enter the port used for wstunnel: " port
+    port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
 
-    # Download wstunnelm.service and modify the port
-    wget -O wstunnelm.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnelm.service
+    wget -O wstunnelm.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnelm.service > /dev/null 2>&1
     sed -i "s/\$port/$port/g" wstunnelm.service
     clear
-    # Send the modified service file to the main server
     scp -P $main_server_port wstunnelm.service $ssh_user@$main_server_ip:/tmp/wstunnelm.service
     clear
-    echo "The service file sent to main server."
-    echo "once again type main server Password:"
-    # SSH to the main server and replace the wstunnel service file
+    whiptail --title "wstunnel Installation" --msgbox "The service file sent to main server." 8 60
+    whiptail --title "wstunnel Installation" --msgbox "once again type main server Password:" 8 60
     ssh -p $main_server_port $ssh_user@$main_server_ip << 'ENDSSH'
     sudo mv /tmp/wstunnelm.service /etc/systemd/system/wstunnel.service
     wget "https://github.com/erebe/wstunnel/releases/download/v5.0/wstunnel-linux-x64"
@@ -494,54 +425,43 @@ install_wstunnel() {
 ENDSSH
 
     clear
-    # Check Wstunnel service status
     status=$(sudo systemctl is-active wstunnel.service)
-
     if [ "$status" = "active" ]; then
-        echo "---------------Wstunnel service status---------------------"
-        echo -e "\e[32mWstunnel service is $status and running.\e[0m"
-        echo "-----------------------------------------------------------"
+        whiptail --title "Wstunnel Installation" --msgbox "Wstunnel tunnel is installed and $status." 8 60
     else
-        echo "---------------Wstunnel service status---------------------"
-        echo -e "\e[31mWstunnel service is not active or failed.\e[0m"
-        echo "-----------------------------------------------------------"
+        whiptail --title "Wstunnel Installation" --msgbox "Wstunnel service is not active or $status." 8 60
     fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
 }
 
 check_wstunnel_port() {
-    # Check port in use
-    echo "---------------------Port in use---------------------------"
-    sudo lsof -i -P -n -sTCP:LISTEN | grep wstunnel | awk '{print "TCP:", $9}'
-    echo "-----------------------------------------------------------"
-    # Check Wstunnel service status
-    status=$(sudo systemctl is-active wstunnel.service)
-
-    if [ "$status" = "active" ]; then
-        echo "---------------Wstunnel service status---------------------"
-        echo -e "\e[32mWstunnel Service Status: $status\e[0m"
-        echo "-----------------------------------------------------------"
-    else
-        echo "---------------Wstunnel service status---------------------"
-        echo -e "\e[31mWstunnel Service Status: $status\e[0m"
-        echo "-----------------------------------------------------------"
-    fi
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
+    wstunnel_ports=$(sudo lsof -i -P -n -sTCP:LISTEN | grep wstunnel | awk '{print $9}')
+    status=$(sudo systemctl is-active wstunnel)
+    service_status="wstunnel Service Status: $status"
+    info="Service Status and Ports in Use:\n\nPorts in use:\n$wstunnel_ports\n\n$service_status"
+    whiptail --title "wstunnel Service Status and Ports" --msgbox "$info" 15 70
 }
 
 uninstall_wstunnel() {
-    echo "Uninstalling wstunnel..."
-    sudo systemctl stop wstunnel.service
-    sudo systemctl disable wstunnel.service
+    (
+    echo "10" "Stopping wstunnel service..."
+    sudo systemctl stop wstunnel.service > /dev/null 2>&1
+    sleep 1
+    echo "30" "Disabling wstunnel service..."
+    sudo systemctl disable wstunnel.service > /dev/null 2>&1
+    sleep 1
+    echo "70" "Uninstalling wstunnel..."
     sudo rm -f /etc/systemd/system/wstunnel.service /bin/wstunnel
+    sleep 1
+    echo "100" "wstunnel Uninstallation completed!"
+    sleep 1
+    ) | dialog --title "wstunnel Uninstallation" --gauge "wstunnel Uninstallation in progress..." 10 100 0
+    whiptail --title "wstunnel Uninstallation" --msgbox "wstunnel Uninstallation completed!" 8 60
     clear
-    echo -e "\e[31mWstunnel service uninstalled From tunnel server.\e[0m"
-    echo "Use ssh to uninstall Wstunnel form main server"
-    read -p "Enter the IP of the main server: " main_server_ip
-    read -p "Enter the user of the main server: " ssh_user
-    read -p "Enter the SSH port of the main server (press Enter for default 22): " main_server_port
+    whiptail --title "wstunnel Uninstallation" --msgbox "Use ssh to uninstall Wstunnel form main server" 8 60
+
+    main_server_ip=$(whiptail --inputbox "Enter the IP of the main server:" 8 60 --title "Enter the main server IP" 3>&1 1>&2 2>&3)
+    ssh_user=$(whiptail --inputbox "Enter the user of the main server:" 8 60 --title "Enter the user" 3>&1 1>&2 2>&3)
+    main_server_port=$(whiptail --inputbox "Enter the SSH port of the main server (press Enter for default 22): " 8 60 --title "Enter the SSH port" 3>&1 1>&2 2>&3)
     main_server_port=${main_server_port:-22}
 
     # SSH to the main server and execute commands
@@ -551,13 +471,7 @@ uninstall_wstunnel() {
     sudo rm -f /etc/systemd/system/wstunnel.service /bin/wstunnel
 ENDSSH
     clear
-    echo "-----------------------------------------"
-    echo -e "\e[31mWstunnel Service Uninstalled.\e[0m"
-    echo "-----------------------------------------"
-
-    # Wait for user input (press any key to continue)
-    read -n 1 -s -r -p "Press any key to return to the menu..."
-    
+    whiptail --title "wstunnel Uninstallation" --msgbox "Wstunnel Service Uninstalled." 8 60
 }
 
 ################################################################
@@ -580,7 +494,7 @@ iptables_menu() {
                     install_iptables
                     ;;
                 Status)
-                    check_iptables
+                    check_port_iptables
                     ;;
                 Uninstall)
                     uninstall_iptables
@@ -755,7 +669,7 @@ socat_menu() {
 wstunnel_menu() {
     while true; do
         choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "WS-Tunnel Menu" --menu "Please choose one of the following options:" 20 60 10 \
-        "Install" "Install And Configure WS-Tunnel On Both Servers" \
+        "Install" "Install And Configure WS-Tunnel" \
         "Status" "Check WS-Tunnel Service And Port" \
         "Uninstall" "Uninstall WS-Tunnel From Both Servers" \
         "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
