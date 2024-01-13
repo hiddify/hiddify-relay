@@ -1,7 +1,15 @@
 #!/bin/bash
 sudo apt update -y
-sudo apt install dialog -y
-sudo apt install whiptail -y
+
+# Check if dialog is installed
+if ! command -v dialog &> /dev/null; then
+    sudo apt install dialog -y
+fi
+
+# Check if whiptail is installed
+if ! command -v whiptail &> /dev/null; then
+    sudo apt install whiptail -y
+fi
 
 # Define partial functions
 ##############################
