@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo apt update -y
+
 
 # Check if dialog is installed
 if ! command -v dialog &> /dev/null; then
@@ -482,6 +482,65 @@ ENDSSH
     whiptail --title "wstunnel Uninstallation" --msgbox "Wstunnel Service Uninstalled." 8 60
 }
 
+
+function configure_dns() {
+    sudo rm /etc/resolv.conf > /dev/null 2>&1
+
+    dns1=$(whiptail --inputbox "Enter DNS Server 1(like 8.8.8.8):" 8 60 3>&1 1>&2 2>&3)
+    dns2=$(whiptail --inputbox "Enter DNS Server 2(like 8.8.4.4):" 8 60 3>&1 1>&2 2>&3)
+
+    echo "nameserver $dns1" | sudo tee -a /etc/resolv.conf
+    echo "nameserver $dns2" | sudo tee -a /etc/resolv.conf
+
+    whiptail --title "DNS Configuration" --msgbox "DNS Configuration completed." 8 60
+    clear
+}
+
+function update_server() {
+    (
+        sudo apt-get update -y
+        echo "100" "Update completed."
+    ) | dialog --title "Update Server" --progressbox 30 120
+
+    whiptail --title "Update Server" --msgbox "Server Update completed." 8 60
+    clear
+}
+
+function ping_websites() {
+    websites=("github.com" "google.com" "www.microsoft.com")
+    results_file=$(mktemp)
+
+    for website in "${websites[@]}"; do
+        gauge_title="Pinging $website"
+        gauge_percentage=0
+        success=false
+
+        (
+            for _ in {1..5}; do
+                sleep 1  
+                ((gauge_percentage += 20))
+                echo "$gauge_percentage"
+                echo "# $gauge_title"
+                echo "Pinging $website..."
+                
+                if ping -c 1 $website &> /dev/null; then
+                    success=true
+                fi
+            done
+            echo "100" 
+        ) | dialog --title "Ping $website" --gauge "$gauge_title" 10 80 0
+
+        result=$(ping -c 5 $website | tail -n 2)
+        echo -e "\n\nPing results for $website:\n$result" >> "$results_file"
+    done
+
+    whiptail --title "Ping Websites" --textbox "$results_file" 30 80
+    clear
+
+    rm "$results_file"
+}
+
+
 ################################################################
 # Define the functions to be executed when an option is selected
 
@@ -708,7 +767,40 @@ wstunnel_menu() {
         fi
     done
 }
+# Define the submenu for Other Options
+function other_options_menu() {
+    while true; do
+        other_choice=$(whiptail --backtitle "Welcome to Hiddify Relay Builder" --title "Other Options" --menu "Please choose one of the following options:" 20 60 10 \
+        "DNS" "Configure DNS" \
+        "Update" "Update Server" \
+        "Ping" "Ping to check internet connectivity" \
+        "Back" "Return to Main Menu" 3>&1 1>&2 2>&3)
 
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $other_choice in
+                DNS)
+                    configure_dns
+                    ;;
+                Update)
+                    update_server
+                    ;;
+                Ping)
+                    ping_websites
+                    ;;
+                Back)
+                    menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    ;;
+            esac
+        else
+            exit 1
+        fi
+    done
+}
 #################################
 # Define the main graphical menu
 function menu() {
@@ -720,6 +812,7 @@ function menu() {
         "HA-Proxy" "Manage HA-Proxy Tunnel" \
         "Socat" "Manage Socat Tunnel" \
         "WST" "Manage Web Socket Tunnel" \
+        "Options" "Additional Configuration Options" \
         "Quit" "Exit From The Script" 3>&1 1>&2 2>&3)
 
         # Check the return value of the whiptail command
@@ -743,6 +836,9 @@ function menu() {
                     ;;
                 WST)
                     wstunnel_menu
+                    ;;
+                Options)
+                    other_options_menu
                     ;;
                 Quit)
                     exit 0
