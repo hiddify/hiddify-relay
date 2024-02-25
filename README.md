@@ -23,7 +23,7 @@ This script provides you with the following methods to create a tunnel between a
 </div>
 
 ## ⚙️ Installation
-In order to create tunnels on your relay server, you just need to run the following command.
+In order to create tunnels on your relay server(for docker), you just need to run the following command.
 
 ```
 bash -c "$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)"
