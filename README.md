@@ -22,7 +22,7 @@ This script provides you with the following methods to create a tunnel between a
 `1. IP-Tables`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`2. GOST`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3. Dokodemo-Door`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`4. HA-Proxy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`5. Socat`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`6. WST`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </div>
 
-## ⚙️ Installation
+## ⚙️ Tutorials
 To view tutorial on setup and installation take a look at [this article](https://hiddify.com/manager/domain-worker-cdn-and-tunneling/How-to-setup-relay-server-using-Hiddify-Relay-Builder/)
 
 
