@@ -391,7 +391,7 @@ install_wstunnel() {
     sudo rm /etc/systemd/system/wstunnel.service > /dev/null 2>&1
     sleep 1
     echo "90"
-    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnels.service > /dev/null 2>&1
+    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/wstunnels.service > /dev/null 2>&1
     sleep 1
     } | dialog --title "Wstunnel Installation" --gauge "Installing Wstunnel..." 10 60
     whiptail --title "wstunnel Installation" --msgbox "wstunnel installation completed." 8 60
@@ -415,7 +415,7 @@ install_wstunnel() {
 
     port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
 
-    wget -O wstunnelm.service https://raw.githubusercontent.com/Hiddify-Return/hiddify-relay/main/wstunnelm.service > /dev/null 2>&1
+    wget -O wstunnelm.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/wstunnelm.service > /dev/null 2>&1
     sed -i "s/\$port/$port/g" wstunnelm.service
     clear
     scp -P $main_server_port wstunnelm.service $ssh_user@$main_server_ip:/tmp/wstunnelm.service
