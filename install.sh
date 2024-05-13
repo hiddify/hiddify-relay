@@ -245,7 +245,7 @@ add_another_inbound() {
 }
 
 remove_inbound() {
-    inbounds=$(jq -r '.inbounds[] | "\(.tag):\(.port)"' /usr/local/etc/xray/config.json)
+    inbounds=$(jq -r '.inbounds[] | select(.tag != "api") | "\(.tag):\(.port)"' /usr/local/etc/xray/config.json)
     
     if [ -z "$inbounds" ]; then
         whiptail --title "Remove Inbound" --msgbox "No inbound configurations found." 8 60
@@ -253,7 +253,7 @@ remove_inbound() {
     fi
     
     selected=$(whiptail --title "Remove Inbound" --menu "Select the inbound configuration to remove:" 20 60 10 \
-    $(echo "$inbounds" | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
+    $(echo "$inbounds" | awk -F ':' '{print $1}' | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
 
     if [ -n "$selected" ]; then
         port=$(echo "$inbounds" | sed -n "${selected}p" | awk -F ':' '{print $2}')
