@@ -232,19 +232,15 @@ check_service_xray() {
 }
 
 add_another_inbound() {
-
     addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
     portnew=$(whiptail --inputbox "Enter the new port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
-    position=$(grep -n -m 1 '"tag": "inbound-1"' /usr/local/etc/xray/config.json | cut -d ':' -f1)
-
-    if [ -n "$position" ]; then
-        position=$((position + 1))
-        sed -i "${position}i \ \ \ \ },\n \ \ \ {\n \ \ \ \ \ \"listen\": null,\n \ \ \ \ \ \"port\": $portnew,\n \ \ \ \ \ \"protocol\": \"dokodemo-door\",\n \ \ \ \ \ \"settings\": {\n \ \ \ \ \ \ \ \"address\": \"$addressnew\",\n \ \ \ \ \ \ \ \"followRedirect\": false,\n \ \ \ \ \ \ \ \"network\": \"tcp,udp\",\n \ \ \ \ \ \ \ \"port\": $portnew\n \ \ \ \ \ },\n \ \ \ \ \ \"tag\": \"inbound-$portnew\"" /usr/local/etc/xray/config.json
-        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
+    if jq --arg address "$addressnew" --arg port "$portnew" '.inbounds += [{ "listen": null, "port": ($port | tonumber), "protocol": "dokodemo-door", "settings": { "address": $address, "followRedirect": false, "network": "tcp,udp", "port": ($port | tonumber) }, "tag": ("inbound-" + $port) }]' /usr/local/etc/xray/config.json > /tmp/config.json.tmp; then
+        sudo mv /tmp/config.json.tmp /usr/local/etc/xray/config.json
         sudo systemctl restart xray
+        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
     else
-        whiptail --title "Install Xray" --msgbox "Error: Could not find the position to add inbound configuration." 8 60
+        whiptail --title "Install Xray" --msgbox "Error: Failed to add inbound configuration." 8 60
     fi
 }
 
