@@ -11,6 +11,11 @@ if ! command -v whiptail &> /dev/null; then
     sudo apt install whiptail -y
 fi
 
+# Check if whiptail is installed
+if ! command -v whiptail &> /dev/null; then
+    sudo apt install jq -y
+fi
+
 # Define partial functions
 ##############################
 ## Functions for iptables setup
@@ -160,7 +165,7 @@ install_xray() {
 
     whiptail --title "Xray Installation" --msgbox "Xray installation completed!" 8 60
     clear
-    address=$(whiptail --inputbox "Enter the address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
+    address=$(whiptail --inputbox "Enter your domain or IP:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
     port=$(whiptail --inputbox "Enter the port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
     inbound_config=$(cat <<EOF
@@ -242,6 +247,39 @@ add_another_inbound() {
         whiptail --title "Install Xray" --msgbox "Error: Could not find the position to add inbound configuration." 8 60
     fi
 }
+
+remove_inbound() {
+    inbounds=$(jq -r '.inbounds[] | "\(.listen):\(.port)"' /usr/local/etc/xray/config.json)
+    
+    if [ -z "$inbounds" ]; then
+        whiptail --title "Remove Inbound" --msgbox "No inbound configurations found." 8 60
+        return
+    fi
+    
+    selected=$(whiptail --title "Remove Inbound" --menu "Select the inbound configuration to remove:" 20 60 10 \
+    $(echo "$inbounds" | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
+
+    if [ -n "$selected" ]; then
+        port=$(echo "$inbounds" | sed -n "${selected}p" | awk -F ':' '{print $2}')
+        remove_inbound_by_port "$port"
+    fi
+}
+
+remove_inbound_by_port() {
+    port=$1
+    if jq --arg port "$port" 'del(.inbounds[] | select(.port == ($port | tonumber)))' /usr/local/etc/xray/config.json > /tmp/config.json.tmp; then
+        sudo mv /tmp/config.json.tmp /usr/local/etc/xray/config.json
+        sudo systemctl restart xray
+        if grep -q "\"port\": $port" /usr/local/etc/xray/config.json; then
+            whiptail --title "Remove Inbound" --msgbox "Failed to remove inbound configuration." 8 60
+        else
+            whiptail --title "Remove Inbound" --msgbox "Inbound configuration removed successfully!" 8 60
+        fi
+    else
+        whiptail --title "Remove Inbound" --msgbox "Failed to remove inbound configuration." 8 60
+    fi
+}
+
 uninstall_xray() {
     (
     echo "10" "Removing Xray configuration..."
@@ -620,13 +658,13 @@ gost_menu() {
     done
 }
 
-# Graphical functionality for Dokodemo menu
 dokodemo_menu() {
     while true; do
         choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "Dokodemo-Door Menu" --menu "Please choose one of the following options:" 20 60 10 \
         "Install" "Install Xray For Dokodemo-Door And Add Inbound" \
         "Status" "Check Xray Service Status" \
         "Add" "Add Another Inbound" \
+        "Remove" "Remove an Inbound Configuration" \
         "Uninstall" "Uninstall Xray And Tunnel" \
         "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
@@ -642,6 +680,9 @@ dokodemo_menu() {
                     ;;
                 Add)
                     add_another_inbound
+                    ;;
+                Remove)
+                    remove_inbound
                     ;;
                 Uninstall)
                     uninstall_xray
@@ -659,6 +700,7 @@ dokodemo_menu() {
         fi
     done
 }
+
 
 # Graphical functionality for Socat menu
 haproxy_menu() {
