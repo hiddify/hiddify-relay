@@ -245,7 +245,7 @@ add_another_inbound() {
 }
 
 remove_inbound() {
-    inbounds=$(jq -r '.inbounds[] | "\(.listen):\(.port)"' /usr/local/etc/xray/config.json)
+    inbounds=$(jq -r '.inbounds[] | "\(.tag):\(.port)"' /usr/local/etc/xray/config.json)
     
     if [ -z "$inbounds" ]; then
         whiptail --title "Remove Inbound" --msgbox "No inbound configurations found." 8 60
