@@ -95,7 +95,7 @@ install_gost() {
     sleep 1
     } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
     
-    domain=$(whiptail --inputbox "Enter domain:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
     port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
 
     sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
@@ -124,7 +124,7 @@ add_port_gost() {
 
     last_port=$(sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print $9}' | awk -F ':' '{print $NF}' | sort -n | tail -n 1)
 
-    new_domain=$(whiptail --inputbox "Enter domain:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    new_domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
     new_port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
 
     sudo sed -i "/ExecStart/s/$/ -L=tcp:\/\/:$new_port\/$new_domain:$new_port/" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
@@ -397,7 +397,7 @@ install_wstunnel() {
     whiptail --title "wstunnel Installation" --msgbox "wstunnel installation completed." 8 60
     clear
     mport=$(whiptail --inputbox "Enter the port use for traffic(like 443 or any port):" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
-    domain=$(whiptail --inputbox "Enter the Main-Server domain:" 8 60 --title "Enter domain" 3>&1 1>&2 2>&3)
+    domain=$(whiptail --inputbox "Enter the Main-Server domain:" 8 60 --title "Enter your domain or IP" 3>&1 1>&2 2>&3)
     port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
 
     sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service > /dev/null 2>&1
