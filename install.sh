@@ -28,19 +28,21 @@ clear
 ## Functions for iptables setup
 install_iptables() {
     IP=$(whiptail --inputbox "Enter your main server IP like (1.1.1.1):" 8 60 3>&1 1>&2 2>&3)
+    TCP_PORTS=$(whiptail --inputbox "Enter ports separated by commas (e.g., 80,443):" 8 60 80,443 3>&1 1>&2 2>&3)
+
     {
         echo "10" "Installing iptables..."
-        sudo apt install -y iptables iptables-persistent > /dev/null 2>&1
+        sudo apt install iptables iptables-persistent -y > /dev/null 2>&1
         echo "30" "Enabling net.ipv4.ip_forward..."
         sudo sysctl net.ipv4.ip_forward=1 > /dev/null 2>&1
         echo "50" "Configuring iptables rules for TCP..."
-        sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports 80,443 -j MASQUERADE > /dev/null 2>&1
+        sudo iptables -t nat -A POSTROUTING -p tcp --match multiport --dports $TCP_PORTS -j MASQUERADE > /dev/null 2>&1
         echo "60" "Configuring iptables rules for TCP DNAT..."
-        sudo iptables -t nat -A PREROUTING -p tcp --match multiport --dports 80,443 -j DNAT --to-destination $IP > /dev/null 2>&1
+        sudo iptables -t nat -A PREROUTING -p tcp --match multiport --dports $TCP_PORTS -j DNAT --to-destination $IP > /dev/null 2>&1
         echo "75" "Configuring iptables rules for UDP..."
-        sudo iptables -t nat -A POSTROUTING -p udp -j MASQUERADE > /dev/null 2>&1
+        sudo iptables -t nat -A POSTROUTING -p udp --match multiport --dports $TCP_PORTS -j MASQUERADE > /dev/null 2>&1
         echo "85" "Configuring iptables rules for UDP DNAT..."
-        sudo iptables -t nat -A PREROUTING -p udp -j DNAT --to-destination $IP > /dev/null 2>&1
+        sudo iptables -t nat -A PREROUTING -p udp --match multiport --dports $TCP_PORTS -j DNAT --to-destination $IP > /dev/null 2>&1
         echo "95" "Creating /etc/iptables/..."
         sudo mkdir -p /etc/iptables/ > /dev/null 2>&1
         sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null
@@ -48,7 +50,7 @@ install_iptables() {
         sudo systemctl start iptables
     } | dialog --title "IPTables Installation" --gauge "Installing IPTables..." 10 100 0
     clear
-    whiptail --title "IPTables Installation" --msgbox "IP-Tables Installation completed." 8 60
+    whiptail --title "IPTables Installation" --msgbox "IPTables installation completed." 8 60
 }
 
 check_port_iptables() {
