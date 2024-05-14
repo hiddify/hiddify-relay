@@ -1,20 +1,27 @@
 #!/bin/bash
 
+# Update without showing any message
+echo "Please be patient while the server updates...."
+sudo apt-get update > /dev/null
 
 # Check if dialog is installed
 if ! command -v dialog &> /dev/null; then
-    sudo apt install dialog -y
+    echo "Installing dialog..."
+    sudo apt install dialog -y > /dev/null
 fi
 
 # Check if whiptail is installed
 if ! command -v whiptail &> /dev/null; then
-    sudo apt install whiptail -y
+    echo "Installing whiptail..."
+    sudo apt install whiptail -y > /dev/null
 fi
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
-    sudo apt install jq -y
+    echo "Installing jq..."
+    sudo apt install jq -y > /dev/null
 fi
+clear
 
 # Define partial functions
 ##############################
