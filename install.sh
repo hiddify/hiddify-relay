@@ -11,8 +11,8 @@ if ! command -v whiptail &> /dev/null; then
     sudo apt install whiptail -y
 fi
 
-# Check if whiptail is installed
-if ! command -v whiptail &> /dev/null; then
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
     sudo apt install jq -y
 fi
 
