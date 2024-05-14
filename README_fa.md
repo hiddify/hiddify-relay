@@ -26,7 +26,7 @@
 </div>
 
 ## ⚙️ آموزش نصب و راه‌اندازی
-برای مشاهده آموزش نصب و راه‌اندازی این اپ، [این مقاله](/fa/manager/domain-worker-cdn-and-tunneling/How-to-setup-relay-server-using-Hiddify-Relay-Builder/) را ملاحظه نمایید.
+برای مشاهده آموزش نصب و راه‌اندازی این اپ، [این مقاله](https://hiddify.com/fa/manager/domain-worker-cdn-and-tunneling/How-to-setup-relay-server-using-Hiddify-Relay-Builder/) را ملاحظه نمایید.
 
 
 <br>
