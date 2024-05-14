@@ -159,7 +159,6 @@ uninstall_gost() {
 
 ##########################
 ## Functions for Xray setup
-
 install_xray() {
     sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install 2>&1 | dialog --title "Xray Installation" --progressbox 30 120
 
@@ -168,45 +167,9 @@ install_xray() {
     address=$(whiptail --inputbox "Enter your domain or IP:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
     port=$(whiptail --inputbox "Enter the port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
-    inbound_config=$(cat <<EOF
-{
-  "inbounds": [
-    {
-      "listen": "127.0.0.1",
-      "port": 62789,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "127.0.0.1"
-      },
-      "tag": "api"
-    },
-    {
-      "listen": null,
-      "port": $port,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "$address",
-        "followRedirect": false,
-        "network": "tcp,udp",
-        "port": $port
-      },
-      "tag": "inbound-1"
-    }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom"
-    },
-    {
-      "protocol": "blackhole",
-      "tag": "blocked"
-    }
-  ]
-}
-EOF
-)
-
-    echo "$inbound_config" > /usr/local/etc/xray/config.json
+    wget -O /tmp/config.json https://raw.githubusercontent.com/hiddify/hiddify-relay/main/config.json > /dev/null 2>&1
+    clear
+    jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
 
     sudo systemctl restart xray
     status=$(sudo systemctl is-active xray)
@@ -217,6 +180,7 @@ EOF
         whiptail --title "Install Xray" --msgbox "Xray service is not active or failed." 8 60
     fi
 
+    rm /tmp/config.json
 }
 
 check_service_xray() {
