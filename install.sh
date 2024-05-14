@@ -11,8 +11,8 @@ if ! command -v whiptail &> /dev/null; then
     sudo apt install whiptail -y
 fi
 
-# Check if whiptail is installed
-if ! command -v whiptail &> /dev/null; then
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
     sudo apt install jq -y
 fi
 
@@ -232,24 +232,20 @@ check_service_xray() {
 }
 
 add_another_inbound() {
-
     addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
     portnew=$(whiptail --inputbox "Enter the new port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
 
-    position=$(grep -n -m 1 '"tag": "inbound-1"' /usr/local/etc/xray/config.json | cut -d ':' -f1)
-
-    if [ -n "$position" ]; then
-        position=$((position + 1))
-        sed -i "${position}i \ \ \ \ },\n \ \ \ {\n \ \ \ \ \ \"listen\": null,\n \ \ \ \ \ \"port\": $portnew,\n \ \ \ \ \ \"protocol\": \"dokodemo-door\",\n \ \ \ \ \ \"settings\": {\n \ \ \ \ \ \ \ \"address\": \"$addressnew\",\n \ \ \ \ \ \ \ \"followRedirect\": false,\n \ \ \ \ \ \ \ \"network\": \"tcp,udp\",\n \ \ \ \ \ \ \ \"port\": $portnew\n \ \ \ \ \ },\n \ \ \ \ \ \"tag\": \"inbound-$portnew\"" /usr/local/etc/xray/config.json
-        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
+    if jq --arg address "$addressnew" --arg port "$portnew" '.inbounds += [{ "listen": null, "port": ($port | tonumber), "protocol": "dokodemo-door", "settings": { "address": $address, "followRedirect": false, "network": "tcp,udp", "port": ($port | tonumber) }, "tag": ("inbound-" + $port) }]' /usr/local/etc/xray/config.json > /tmp/config.json.tmp; then
+        sudo mv /tmp/config.json.tmp /usr/local/etc/xray/config.json
         sudo systemctl restart xray
+        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
     else
-        whiptail --title "Install Xray" --msgbox "Error: Could not find the position to add inbound configuration." 8 60
+        whiptail --title "Install Xray" --msgbox "Error: Failed to add inbound configuration." 8 60
     fi
 }
 
 remove_inbound() {
-    inbounds=$(jq -r '.inbounds[] | "\(.listen):\(.port)"' /usr/local/etc/xray/config.json)
+    inbounds=$(jq -r '.inbounds[] | select(.tag != "api") | "\(.tag):\(.port)"' /usr/local/etc/xray/config.json)
     
     if [ -z "$inbounds" ]; then
         whiptail --title "Remove Inbound" --msgbox "No inbound configurations found." 8 60
@@ -257,7 +253,7 @@ remove_inbound() {
     fi
     
     selected=$(whiptail --title "Remove Inbound" --menu "Select the inbound configuration to remove:" 20 60 10 \
-    $(echo "$inbounds" | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
+    $(echo "$inbounds" | awk -F ':' '{print $1}' | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
 
     if [ -n "$selected" ]; then
         port=$(echo "$inbounds" | sed -n "${selected}p" | awk -F ':' '{print $2}')
