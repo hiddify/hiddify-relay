@@ -20,9 +20,9 @@
 
 # سرور میانی ساز هیدیفای
 این اسکریپت روش‌های زیر را برای ایجاد یک تونل بین سرور میانی و سرور اصلی در اختیار شما قرار میدهد.
-<div align=center>
+<div align=left>
  
-`۱. IP-Tables`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`۲. GOST`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`۳. Dokodemo-Door`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`۴. HA-Proxy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`۵. Socat`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`۶. WST`
+`۱. IP-Tables`<br>`۲. GOST`<br>`۳. Dokodemo-Door`<br>`۴. HA-Proxy`<br>`۵. Socat`<br>`۶. WST`
 </div>
 
 ## ⚙️ آموزش نصب و راه‌اندازی
