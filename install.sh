@@ -32,7 +32,7 @@ install_iptables() {
 
     {
         echo "10" "Installing iptables..."
-        sudo apt install iptables iptables-persistent -y > /dev/null 2>&1
+        sudo apt install iptables -y > /dev/null 2>&1
         echo "30" "Enabling net.ipv4.ip_forward..."
         sudo sysctl net.ipv4.ip_forward=1 > /dev/null 2>&1
         echo "50" "Configuring iptables rules for TCP..."
