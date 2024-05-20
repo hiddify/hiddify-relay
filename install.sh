@@ -7,19 +7,19 @@ sudo apt-get update > /dev/null
 # Check if dialog is installed
 if ! command -v dialog &> /dev/null; then
     echo "Installing dialog..."
-    sudo apt install dialog -y > /dev/null
+    sudo apt-get install dialog -y > /dev/null
 fi
 
 # Check if whiptail is installed
 if ! command -v whiptail &> /dev/null; then
     echo "Installing whiptail..."
-    sudo apt install whiptail -y > /dev/null
+    sudo apt-get install whiptail -y > /dev/null
 fi
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
     echo "Installing jq..."
-    sudo apt install jq -y > /dev/null
+    sudo apt-get install jq -y > /dev/null
 fi
 clear
 
