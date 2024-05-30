@@ -225,15 +225,11 @@ add_another_inbound() {
 
 add_another_inbound() {
     addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
-
+    
     while : ; do
         portnew=$(whiptail --inputbox "Enter the new port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
         if [[ "$portnew" =~ ^[0-9]+$ ]]; then
-            if jq --arg port "$portnew" '.inbounds[] | select(.port == ($port | tonumber))' /usr/local/etc/xray/config.json > /dev/null; then
-                whiptail --title "Invalid Input" --msgbox "Port $portnew already exists. Please try another port." 8 60
-            else
-                break
-            fi
+            break
         else
             whiptail --title "Invalid Input" --msgbox "Port must be a numeric value. Please try again." 8 60
         fi
@@ -247,6 +243,7 @@ add_another_inbound() {
         whiptail --title "Install Xray" --msgbox "Error: Failed to add inbound configuration." 8 60
     fi
 }
+
 
 remove_inbound_by_port() {
     port=$1
