@@ -174,8 +174,14 @@ install_xray() {
     whiptail --title "Xray Installation" --msgbox "Xray installation completed!" 8 60
     clear
     address=$(whiptail --inputbox "Enter your domain or IP:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
-    port=$(whiptail --inputbox "Enter the port:" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
-
+    while : ; do
+        port=$(whiptail --inputbox "Enter the port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$port" =~ ^[0-9]+$ ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value. Please try again." 8 60
+        fi
+    done
     wget -O /tmp/config.json https://raw.githubusercontent.com/hiddify/hiddify-relay/main/config.json > /dev/null 2>&1
     clear
     jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
@@ -217,20 +223,28 @@ add_another_inbound() {
     fi
 }
 
-remove_inbound() {
-    inbounds=$(jq -r '.inbounds[] | select(.tag != "api") | "\(.tag):\(.port)"' /usr/local/etc/xray/config.json)
-    
-    if [ -z "$inbounds" ]; then
-        whiptail --title "Remove Inbound" --msgbox "No inbound configurations found." 8 60
-        return
-    fi
-    
-    selected=$(whiptail --title "Remove Inbound" --menu "Select the inbound configuration to remove:" 20 60 10 \
-    $(echo "$inbounds" | awk -F ':' '{print $1}' | nl -w2 -s ' ') 3>&1 1>&2 2>&3)
+add_another_inbound() {
+    addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
 
-    if [ -n "$selected" ]; then
-        port=$(echo "$inbounds" | sed -n "${selected}p" | awk -F ':' '{print $2}')
-        remove_inbound_by_port "$port"
+    while : ; do
+        portnew=$(whiptail --inputbox "Enter the new port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$portnew" =~ ^[0-9]+$ ]]; then
+            if jq --arg port "$portnew" '.inbounds[] | select(.port == ($port | tonumber))' /usr/local/etc/xray/config.json > /dev/null; then
+                whiptail --title "Invalid Input" --msgbox "Port $portnew already exists. Please try another port." 8 60
+            else
+                break
+            fi
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value. Please try again." 8 60
+        fi
+    done
+
+    if jq --arg address "$addressnew" --arg port "$portnew" '.inbounds += [{ "listen": null, "port": ($port | tonumber), "protocol": "dokodemo-door", "settings": { "address": $address, "followRedirect": false, "network": "tcp,udp", "port": ($port | tonumber) }, "tag": ("inbound-" + $port) }]' /usr/local/etc/xray/config.json > /tmp/config.json.tmp; then
+        sudo mv /tmp/config.json.tmp /usr/local/etc/xray/config.json
+        sudo systemctl restart xray
+        whiptail --title "Install Xray" --msgbox "Additional inbound added." 8 60
+    else
+        whiptail --title "Install Xray" --msgbox "Error: Failed to add inbound configuration." 8 60
     fi
 }
 
