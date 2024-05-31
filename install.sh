@@ -110,10 +110,16 @@ install_gost() {
     } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
     
     domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
-    port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    while : ; do
+        port=$(whiptail --inputbox "Enter the port number (1-65535):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 0 && "$port" -le 65535 ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
+        fi
+    done
 
     sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
-
     sudo systemctl start gost > /dev/null 2>&1
     sudo systemctl enable gost > /dev/null 2>&1
     status=$(sudo systemctl is-active gost)
@@ -135,11 +141,27 @@ check_port_gost() {
 }
 
 add_port_gost() {
-
     last_port=$(sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print $9}' | awk -F ':' '{print $NF}' | sort -n | tail -n 1)
 
     new_domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
-    new_port=$(whiptail --inputbox "Enter port number:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+
+    while : ; do
+        new_port=$(whiptail --inputbox "Enter the port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        
+        if [[ "$new_port" =~ ^[0-9]+$ ]]; then
+            if (( new_port >= 0 && new_port <= 65535 )); then
+                if sudo lsof -i -P -n -sTCP:LISTEN | grep ":$new_port " > /dev/null 2>&1; then
+                    whiptail --title "Port Already in Use" --msgbox "Port $new_port is already in use. Please choose another port." 8 60
+                else
+                    break
+                fi
+            else
+                whiptail --title "Invalid Port Number" --msgbox "Port number must be between 1 and 65535. Please try again." 8 60
+            fi
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value. Please try again." 8 60
+        fi
+    done
 
     sudo sed -i "/ExecStart/s/$/ -L=tcp:\/\/:$new_port\/$new_domain:$new_port/" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
     sudo systemctl daemon-reload > /dev/null 2>&1
