@@ -582,7 +582,7 @@ function update_server() {
 }
 
 function ping_websites() {
-    websites=("github.com" "google.com" "www.microsoft.com")
+    websites=("github.com" "google.com" "www.cloudflare.com")
     results_file=$(mktemp)
 
     for website in "${websites[@]}"; do
