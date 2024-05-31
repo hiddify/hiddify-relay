@@ -313,7 +313,7 @@ uninstall_xray() {
 ## Functions for HA-Proxy setup
 install_haproxy() {
     {
-        echo "10" "Install HAProxy"
+        echo "10" "Installing HAProxy..."
         sudo apt-get install haproxy -y > /dev/null 2>&1
         sleep 1
         echo "30" "Downloading haproxy.cfg..."
@@ -329,19 +329,38 @@ install_haproxy() {
 
     whiptail --title "HAProxy Installation" --msgbox "HAProxy installation completed." 8 60
 
-    target_iport=$(whiptail --inputbox "Enter Relay-Server Free Port:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+    while true; do
+        target_iport=$(whiptail --inputbox "Enter Relay-Server Free Port (1-65535):" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+        if [[ "$target_iport" =~ ^[0-9]+$ ]] && [ "$target_iport" -ge 1 ] && [ "$target_iport" -le 65535 ]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Please enter a valid numeric port between 1 and 65535." 8 60
+        fi
+    done
+
     target_ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
-    target_port=$(whiptail --inputbox "Enter Main-Server Port:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
 
-    sudo sed -i "s/\$iport/$target_iport/g; s/\$IP/$target_ip/g; s/\$port/$target_port/g" /etc/haproxy/haproxy.cfg > /dev/null 2>&1
+    while true; do
+        target_port=$(whiptail --inputbox "Enter Main-Server Port (1-65535):" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+        if [[ "$target_port" =~ ^[0-9]+$ ]] && [ "$target_port" -ge 1 ] && [ "$target_port" -le 65535 ]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Please enter a valid numeric port between 1 and 65535." 8 60
+        fi
+    done
 
-    sudo systemctl restart haproxy > /dev/null 2>&1
+    if [[ -n "$target_ip" ]]; then
+        sudo sed -i "s/\$iport/$target_iport/g; s/\$IP/$target_ip/g; s/\$port/$target_port/g" /etc/haproxy/haproxy.cfg > /dev/null 2>&1
+        sudo systemctl restart haproxy > /dev/null 2>&1
 
-    status=$(sudo systemctl is-active haproxy)
-    if [ "$status" = "active" ]; then
-        whiptail --title "HAProxy Installation" --msgbox "HA-Proxy tunnel is installed and $status." 8 60
+        status=$(sudo systemctl is-active haproxy)
+        if [ "$status" = "active" ]; then
+            whiptail --title "HAProxy Installation" --msgbox "HA-Proxy tunnel is installed and active." 8 60
+        else
+            whiptail --title "HAProxy Installation" --msgbox "HA-Proxy service is not active. Status: $status." 8 60
+        fi
     else
-        whiptail --title "HAProxy Installation" --msgbox "HA-Proxy service is not active or $status." 8 60
+        whiptail --title "HAProxy Installation" --msgbox "Invalid IP input. Please ensure the field is filled correctly." 8 60
     fi
 }
 
@@ -386,7 +405,14 @@ install_socat() {
     whiptail --title "Socat Installation" --msgbox "Socat installation completed." 8 60
     clear
     ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
-    port=$(whiptail --inputbox "Enter Main-Server Port:" 8 60 --title "Enter Port" 3>&1 1>&2 2>&3)
+    while : ; do
+        port=$(whiptail --inputbox "Enter the Main-Server number (1-65535):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 0 && "$port" -le 65535 ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
+        fi
+    done
 
     sudo sed -i "s/\$ip/$ip/g" /etc/systemd/system/socat.service > /dev/null 2>&1
     sudo sed -i "s/\$port/$port/g" /etc/systemd/system/socat.service > /dev/null 2>&1
