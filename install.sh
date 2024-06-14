@@ -477,9 +477,25 @@ install_wstunnel() {
     } | dialog --title "Wstunnel Installation" --gauge "Installing Wstunnel..." 10 60
     whiptail --title "wstunnel Installation" --msgbox "wstunnel installation completed." 8 60
     clear
-    mport=$(whiptail --inputbox "Enter the port use for traffic(like 443 or any port):" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
-    domain=$(whiptail --inputbox "Enter the Main-Server domain:" 8 60 --title "Enter your domain or IP" 3>&1 1>&2 2>&3)
-    port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
+    # mport=$(whiptail --inputbox "Enter the port use for traffic(like 443 or any port):" 8 60 --title "Enter IP" 3>&1 1>&2 2>&3)
+    # port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
+    while : ; do
+        mport=$(whiptail --inputbox "Enter the port use for traffic like 443(1-65535):" 8 60 --title "Main-Server Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$mport" =~ ^[0-9]+$ && "$mport" -ge 1 && "$mport" -le 65535 ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
+        fi
+    done
+    domain=$(whiptail --inputbox "Enter the Main-Server domain or IP:" 8 60 --title "Enter your domain or IP" 3>&1 1>&2 2>&3)
+    while : ; do
+        port=$(whiptail --inputbox "Enter the wstunnel port number (1-65535):" 8 60 --title "wstunnel Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 1 && "$port" -le 65535 ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
+        fi
+    done
 
     sudo sed -i "s/\$mport/$mport/g; s/\$domain/$domain/g; s/\$port/$port/g" /etc/systemd/system/wstunnel.service > /dev/null 2>&1
 
@@ -494,7 +510,14 @@ install_wstunnel() {
     main_server_port=$(whiptail --inputbox "Enter the SSH port of the main server (press Enter for default 22): " 8 60 --title "Enter the SSH port" 3>&1 1>&2 2>&3)
     main_server_port=${main_server_port:-22}
 
-    port=$(whiptail --inputbox "Enter the port used for wstunnel:" 8 60 --title "Enter wstunnel port" 3>&1 1>&2 2>&3)
+    while : ; do
+        port=$(whiptail --inputbox "Enter the wstunnel port number (1-65535):" 8 60 --title "wstunnel Port Input" 3>&1 1>&2 2>&3)
+        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 1 && "$port" -le 65535 ]]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
+        fi
+    done
 
     wget -O wstunnelm.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/wstunnelm.service > /dev/null 2>&1
     sed -i "s/\$port/$port/g" wstunnelm.service
