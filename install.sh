@@ -197,7 +197,7 @@ uninstall_gost() {
 ##########################
 ## Functions for Xray setup
 install_xray() {
-    sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install 2>&1 | dialog --title "Xray Installation" --progressbox 30 120
+    bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install 2>&1 | dialog --title "Xray Installation" --progressbox 30 120
 
     whiptail --title "Xray Installation" --msgbox "Xray installation completed!" 8 60
     clear
