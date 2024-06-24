@@ -1,31 +1,30 @@
 #!/bin/bash
 
+# Check if the alias already exists in .bashrc
+if ! grep -q "alias relay='bash -c \"\$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)\"'" ~/.bashrc; then
+    echo "alias relay='bash -c \"\$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)\"'" >> ~/.bashrc
+    echo "Alias added to .bashrc"
+    source ~/.bashrc
+else
+    echo "Alias already exists in .bashrc"
+    source ~/.bashrc
+fi
+
 # Update and Upgrade Server
-sudo apt update && apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 
-# Check if dialog is installed
-if ! command -v dialog &> /dev/null; then
-    echo "Installing dialog..."
-    sudo apt install dialog -y
-fi
+# Function to install a package if not already installed
+install_if_not_installed() {
+    if ! command -v $1 &> /dev/null; then
+        echo "Installing $1..."
+        sudo apt install $1 -y
+    fi
+}
 
-# Check if whiptail is installed
-if ! command -v whiptail &> /dev/null; then
-    echo "Installing whiptail..."
-    sudo apt install whiptail -y
-fi
-
-# Check if jq is installed
-if ! command -v jq &> /dev/null; then
-    echo "Installing jq..."
-    sudo apt install jq -y
-fi
-
-# Check if lsof is installed
-if ! command -v lsof &> /dev/null; then
-    echo "Installing lsof..."
-    sudo apt install lsof -y
-fi
+install_if_not_installed dialog
+install_if_not_installed whiptail
+install_if_not_installed jq
+install_if_not_installed lsof
 
 clear
 
