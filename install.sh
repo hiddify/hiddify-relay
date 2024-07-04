@@ -170,7 +170,7 @@ install_gost() {
         echo "10"
         curl -fsSL https://github.com/go-gost/gost/raw/master/install.sh | bash -s -- --install > /dev/null 2>&1
         echo "50"
-        sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/gost.service > /dev/null 2>&1
+        sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service > /dev/null 2>&1
         sleep 1
         echo "70"
     } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
@@ -343,7 +343,7 @@ install_xray() {
         fi
     done
 
-    wget -q -O /tmp/config.json https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/config.json
+    wget -q -O /tmp/config.json https://raw.githubusercontent.com/hiddify/hiddify-relay/main/config.json
 
     jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
     clear
@@ -490,7 +490,7 @@ install_haproxy() {
         sudo $PACKAGE_MANAGER install haproxy -y > /dev/null 2>&1
         sleep 1
         echo "30" "Downloading haproxy.cfg..."
-        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/haproxy.cfg" > /dev/null 2>&1
+        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg" > /dev/null 2>&1
         sleep 1
         echo "50" "Removing existing haproxy.cfg..."
         sudo rm /etc/haproxy/haproxy.cfg > /dev/null 2>&1
