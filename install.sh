@@ -1,5 +1,79 @@
 #!/bin/bash
 
+# Check if the user has sudo permissions
+if sudo -n true 2>/dev/null; then
+    echo "This User has sudo permissions"
+else
+    echo "This User does not have sudo permissions"
+    exit 1
+fi
+
+# Detect OS and set package/service managers
+if [ -f /etc/redhat-release ]; then
+    if grep -q "Rocky" /etc/redhat-release; then
+        OS="Rocky"
+        PACKAGE_MANAGER="dnf"
+        SERVICE_MANAGER="systemctl"
+    elif grep -q "AlmaLinux" /etc/redhat-release; then
+        OS="AlmaLinux"
+        PACKAGE_MANAGER="dnf"
+        SERVICE_MANAGER="systemctl"
+    else
+        OS="CentOS"
+        PACKAGE_MANAGER="yum"
+        SERVICE_MANAGER="systemctl"
+    fi
+elif [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case "$ID" in
+        ubuntu)
+            OS="Ubuntu"
+            PACKAGE_MANAGER="apt"
+            SERVICE_MANAGER="systemctl"
+            ;;
+        debian)
+            OS="Debian"
+            PACKAGE_MANAGER="apt"
+            SERVICE_MANAGER="systemctl"
+            ;;
+        fedora)
+            OS="Fedora"
+            PACKAGE_MANAGER="dnf"
+            SERVICE_MANAGER="systemctl"
+            ;;
+        *)
+            echo "Unsupported OS"
+            exit 1
+            ;;
+    esac
+else
+    echo "Unsupported OS"
+    exit 1
+fi
+
+# Update
+if [ "$PACKAGE_MANAGER" = "apt" ]; then
+    sudo apt update
+else
+    sudo $PACKAGE_MANAGER update -y
+fi
+
+# Install necessary packages
+install_package() {
+    package=$1
+    if ! command -v $package &> /dev/null; then
+        echo "Installing $package..."
+        sudo $PACKAGE_MANAGER install $package -y
+    fi
+}
+
+install_package dialog
+install_package whiptail
+install_package jq
+install_package lsof
+install_package tar 
+install_package wget
+
 # Check if the alias already exists in .bashrc
 if ! grep -q "alias relay='bash -c \"\$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)\"'" ~/.bashrc; then
     echo "alias relay='bash -c \"\$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)\"'" >> ~/.bashrc
@@ -9,24 +83,8 @@ else
     echo "Alias already exists in .bashrc"
     source ~/.bashrc
 fi
-
-# Update and Upgrade Server
-sudo apt update && sudo apt upgrade -y
-
-# Function to install a package if not already installed
-install_if_not_installed() {
-    if ! command -v $1 &> /dev/null; then
-        echo "Installing $1..."
-        sudo apt install $1 -y
-    fi
-}
-
-install_if_not_installed dialog
-install_if_not_installed whiptail
-install_if_not_installed jq
-install_if_not_installed lsof
-
 clear
+
 
 # Define partial functions
 ##############################
@@ -37,7 +95,7 @@ install_iptables() {
 
     {
         echo "10" "Installing iptables..."
-        sudo apt install iptables -y > /dev/null 2>&1
+        sudo $PACKAGE_MANAGER install iptables -y > /dev/null 2>&1
         echo "30" "Enabling net.ipv4.ip_forward..."
         sudo sysctl net.ipv4.ip_forward=1 > /dev/null 2>&1
         echo "50" "Configuring iptables rules for TCP..."
@@ -68,71 +126,81 @@ check_port_iptables() {
 }
 
 uninstall_iptables() {
-    {
-        echo "10" "Flushing iptables rules..."
-        sudo iptables -F > /dev/null 2>&1
-        sleep 1
-        echo "20" "Deleting all user-defined chains..."
-        sudo iptables -X > /dev/null 2>&1
-        sleep 1
-        echo "40" "Flushing NAT table..."
-        sudo iptables -t nat -F > /dev/null 2>&1
-        sleep 1
-        echo "50" "Deleting user-defined chains in NAT table..."
-        sudo iptables -t nat -X > /dev/null 2>&1
-        sleep 1
-        echo "70" "Removing /etc/iptables/rules.v4..."
-        sudo rm /etc/iptables/rules.v4 > /dev/null 2>&1
-        sleep 1
-        echo "80" "Stopping iptables service..."
-        sudo systemctl stop iptables > /dev/null 2>&1
-        sleep 1
-        echo "100" "IPTables Uninstallation completed!"
-    } | dialog --title "IPTables Uninstallation" --gauge "Uninstalling IPTables..." 10 100 0
-    clear
-    whiptail --title "IPTables Uninstallation" --msgbox "IPTables Uninstalled." 8 60
+    if whiptail --title "Confirm Uninstallation" --yesno "Are you sure you want to uninstall IPTables?" 8 60; then
+        {
+            echo "10" ; echo "Flushing iptables rules..."
+            sudo iptables -F > /dev/null 2>&1
+            sleep 1
+            echo "20" ; echo "Deleting all user-defined chains..."
+            sudo iptables -X > /dev/null 2>&1
+            sleep 1
+            echo "40" ; echo "Flushing NAT table..."
+            sudo iptables -t nat -F > /dev/null 2>&1
+            sleep 1
+            echo "50" ; echo "Deleting user-defined chains in NAT table..."
+            sudo iptables -t nat -X > /dev/null 2>&1
+            sleep 1
+            echo "70" ; echo "Removing /etc/iptables/rules.v4..."
+            sudo rm /etc/iptables/rules.v4 > /dev/null 2>&1
+            sleep 1
+            echo "80" ; echo "Stopping iptables service..."
+            sudo systemctl stop iptables > /dev/null 2>&1
+            sleep 1
+            echo "100" ; echo "IPTables Uninstallation completed!"
+        } | whiptail --gauge "Uninstalling IPTables..." 10 70 0
+        clear
+        whiptail --title "IPTables Uninstallation" --msgbox "IPTables Uninstalled." 8 60
+    else
+        whiptail --title "IPTables Uninstallation" --msgbox "Uninstallation cancelled." 8 60
+        clear
+    fi
 }
-
 
 ##########################
 ## Functions for GOST setup
 install_gost() {
+    if systemctl is-active --quiet gost; then
+        if ! (whiptail --title "Confirm Installation" --yesno "GOST service is already installed. Do you want to reinstall?" 8 60); then
+            whiptail --title "Installation Cancelled" --msgbox "Installation cancelled. GOST service remains installed." 8 60
+            return
+        fi
+    fi
+
     {
-    echo "20"
-    wget -q https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
-    sleep 1
-    echo "40"
-    gunzip -q gost-linux-amd64-2.11.5.gz
-    sleep 1
-    echo "60"
-    sudo mv gost-linux-amd64-2.11.5 /usr/local/bin/gost
-    sleep 1
-    echo "80"
-    sudo chmod +x /usr/local/bin/gost
-    echo "90"
-    sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service
-    sleep 1
+        echo "10"
+        curl -fsSL https://github.com/go-gost/gost/raw/master/install.sh | bash -s -- --install > /dev/null 2>&1
+        echo "50"
+        sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/gost.service > /dev/null 2>&1
+        sleep 1
+        echo "70"
     } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
-    
-    domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+
+    domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60 --title "GOST Installation" 3>&1 1>&2 2>&3)
     while : ; do
         port=$(whiptail --inputbox "Enter the port number (1-65535):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
-        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 0 && "$port" -le 65535 ]]; then
+        if [[ "$port" =~ ^[0-9]+$ && "$port" -ge 1 && "$port" -le 65535 ]]; then
             break
         else
             whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
         fi
     done
 
-    sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
-    sudo systemctl start gost > /dev/null 2>&1
-    sudo systemctl enable gost > /dev/null 2>&1
+    {
+        echo "80"
+        sudo sed -i "s|ExecStart=/usr/local/bin/gost -L=tcp://:\$port/\$domain:\$port|ExecStart=/usr/local/bin/gost -L=tcp://:$port/$domain:$port|g" /usr/lib/systemd/system/gost.service > /dev/null 2>&1
+        sudo systemctl daemon-reload > /dev/null 2>&1
+        sudo systemctl start gost > /dev/null 2>&1
+        sudo systemctl enable gost > /dev/null 2>&1
+        echo "100"
+        sleep 1
+    } | dialog --title "GOST Configuration" --gauge "Configuring GOST service..." 10 60
+
     status=$(sudo systemctl is-active gost)
 
     if [ "$status" = "active" ]; then
-        whiptail --title "GOST Service Status" --msgbox "Gost tunnel is installed and $status." 8 60
+        whiptail --title "GOST Service Status" --msgbox "GOST tunnel is installed and active." 8 60
     else
-        whiptail --title "GOST Installation" --msgbox "GOST service is not active or $status." 8 60
+        whiptail --title "GOST Installation" --msgbox "GOST service is not active. Status: $status." 8 60
     fi
     clear
 }
@@ -146,12 +214,27 @@ check_port_gost() {
 }
 
 add_port_gost() {
+    if ! systemctl is-active --quiet gost; then
+        whiptail --title "GOST Not Active" --msgbox "GOST service is not active.\nPlease start GOST before adding new configuration." 8 60
+        return
+    fi
+
     last_port=$(sudo lsof -i -P -n -sTCP:LISTEN | grep gost | awk '{print $9}' | awk -F ':' '{print $NF}' | sort -n | tail -n 1)
 
     new_domain=$(whiptail --inputbox "Enter your domain or IP:" 8 60  --title "GOST Installation" 3>&1 1>&2 2>&3)
+    exit_status=$?
+    if [ $exit_status != 0 ]; then
+        whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+        return
+    fi
 
     while : ; do
         new_port=$(whiptail --inputbox "Enter the port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        exit_status=$?
+        if [ $exit_status != 0 ]; then
+            whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+            return
+        fi
         
         if [[ "$new_port" =~ ^[0-9]+$ ]]; then
             if (( new_port >= 0 && new_port <= 65535 )); then
@@ -174,32 +257,82 @@ add_port_gost() {
     whiptail --title "GOST configuration" --msgbox "New domain and port added." 8 60
 }
 
+remove_port_gost() {
+    ports=$(grep -oP '(?<=-L=tcp://:)\d+(?=/)' /usr/lib/systemd/system/gost.service)
+
+    if [ -z "$ports" ]; then
+        whiptail --title "Remove Port" --msgbox "No ports found in the GOST configuration." 8 60
+        return
+    fi
+
+    port_list=()
+    for port in $ports; do
+        port_list+=("$port" "")
+    done
+
+    selected_port=$(whiptail --title "Remove Port" --menu "Choose the port to remove:" 15 60 5 "${port_list[@]}" 3>&1 1>&2 2>&3)
+
+    if [ -z "$selected_port" ]; then
+        whiptail --title "Remove Port" --msgbox "No port selected. No changes made." 8 60
+        return
+    fi
+
+    line=$(grep -oP "ExecStart=.*-L=tcp://:$selected_port/[^ ]+" /usr/lib/systemd/system/gost.service)
+    domain=$(echo "$line" | grep -oP "(?<=-L=tcp://:$selected_port/).+")
+
+    if whiptail --title "Confirm Removal" --yesno "Are you sure you want to remove the port $selected_port with domain/IP $domain?" 8 60; then
+        sudo sed -i "\|ExecStart=.*-L=tcp://:$selected_port/$domain|s| -L=tcp://:$selected_port/$domain||" /usr/lib/systemd/system/gost.service
+
+        {
+            echo "50"
+            sudo systemctl daemon-reload > /dev/null 2>&1
+            sudo systemctl restart gost > /dev/null 2>&1
+            echo "100"
+        } | dialog --title "GOST Configuration" --gauge "Removing port $selected_port from GOST service..." 10 60
+
+        whiptail --title "Remove Port" --msgbox "Port $selected_port with domain/IP $domain has been removed from the GOST configuration." 8 60
+    else
+        whiptail --title "Remove Port" --msgbox "No changes made." 8 60
+    fi
+}
+
 uninstall_gost() {
-    {
-        echo "20" "Stopping GOST service..."
-        sudo systemctl stop gost > /dev/null 2>&1
-        sleep 1
-        echo "40" "Disabling GOST service..."
-        sudo systemctl disable gost > /dev/null 2>&1
-        sleep 1
-        echo "60" "Reloading systemctl daemon..."
-        sudo systemctl daemon-reload > /dev/null 2>&1
-        sleep 1
-        echo "80" "Removing GOST service and binary..."
-        sudo rm -f /usr/lib/systemd/system/gost.service /usr/local/bin/gost
-        sleep 1
-    } | dialog --title "GOST Uninstallation" --gauge "Uninstalling GOST..." 10 60 0
-    clear
-    whiptail --title "GOST Uninstallation" --msgbox "GOST Service Uninstalled." 8 60
+    if whiptail --title "Confirm Uninstallation" --yesno "Are you sure you want to uninstall GOST?" 8 60; then
+        {
+            echo "20" "Stopping GOST service..."
+            sudo systemctl stop gost > /dev/null 2>&1
+            sleep 1
+            echo "40" "Disabling GOST service..."
+            sudo systemctl disable gost > /dev/null 2>&1
+            sleep 1
+            echo "60" "Reloading systemctl daemon..."
+            sudo systemctl daemon-reload > /dev/null 2>&1
+            sleep 1
+            echo "80" "Removing GOST service and binary..."
+            sudo rm -f /usr/lib/systemd/system/gost.service /usr/local/bin/gost
+            sleep 1
+        } | dialog --title "GOST Uninstallation" --gauge "Uninstalling GOST..." 10 60 0
+        clear
+        whiptail --title "GOST Uninstallation" --msgbox "GOST Service Uninstalled." 8 60
+    else
+        whiptail --title "GOST Uninstallation" --msgbox "Uninstallation cancelled." 8 60
+    fi
 }
 
 ##########################
 ## Functions for Xray setup
 install_xray() {
+    if systemctl is-active --quiet xray; then
+        if ! (whiptail --title "Confirm Installation" --yesno "Xray service is already active. Do you want to reinstall?" 8 60); then
+            whiptail --title "Installation Cancelled" --msgbox "Installation cancelled. Xray service remains active." 8 60
+            return
+        fi
+    fi
+
     bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install 2>&1 | dialog --title "Xray Installation" --progressbox 30 120
 
     whiptail --title "Xray Installation" --msgbox "Xray installation completed!" 8 60
-    clear
+
     address=$(whiptail --inputbox "Enter your domain or IP:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
     while : ; do
         port=$(whiptail --inputbox "Enter the port (numeric only 1-65535):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
@@ -209,10 +342,11 @@ install_xray() {
             whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
         fi
     done
-    wget -O /tmp/config.json https://raw.githubusercontent.com/hiddify/hiddify-relay/main/config.json > /dev/null 2>&1
-    clear
-    jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
 
+    wget -q -O /tmp/config.json https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/config.json
+
+    jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
+    clear
     sudo systemctl restart xray
     status=$(sudo systemctl is-active xray)
 
@@ -238,13 +372,27 @@ check_service_xray() {
 }
 
 add_another_inbound() {
+    if ! systemctl is-active --quiet xray; then
+    whiptail --title "Install Xray" --msgbox "xray service is not active.\nPlease start xray before adding new configuration." 8 60
+        return
+    fi
     addressnew=$(whiptail --inputbox "Enter the new address:" 8 60 --title "Address Input" 3>&1 1>&2 2>&3)
+    exit_status=$?
+    if [ $exit_status != 0 ]; then
+        whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+        return
+    fi
 
     while : ; do
         portnew=$(whiptail --inputbox "Enter the new port (numeric only):" 8 60 --title "Port Input" 3>&1 1>&2 2>&3)
+        exit_status=$?
+        if [ $exit_status != 0 ]; then
+            whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+            return
+        fi
         
-        if ! [[ "$portnew" =~ ^[0-9]+$ ]]; then
-            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value. Please try again." 8 60
+        if ! [[ "$portnew" =~ ^[0-9]+$ ]] || ! (( portnew >= 1 && portnew <= 65535 )); then
+            whiptail --title "Invalid Input" --msgbox "Port must be a numeric value between 1 and 65535. Please try again." 8 60
             continue
         fi
 
@@ -277,7 +425,15 @@ remove_inbound() {
 
     if [ -n "$selected" ]; then
         port=$(echo "$inbounds" | sed -n "${selected}p" | awk -F ':' '{print $2}')
-        remove_inbound_by_port "$port"
+        
+        # Confirm removal
+        whiptail --title "Confirm Removal" --yesno "Are you sure you want to remove the inbound configuration for port $port?" 8 60
+        response=$?
+        if [ $response -eq 0 ]; then
+            remove_inbound_by_port "$port"
+        else
+            whiptail --title "Remove Inbound" --msgbox "Inbound configuration removal canceled." 8 60
+        fi
     fi
 }
 
@@ -297,32 +453,44 @@ remove_inbound_by_port() {
 }
 
 uninstall_xray() {
-    (
-    echo "10" "Removing Xray configuration..."
-    sudo rm /usr/local/etc/xray/config.json > /dev/null 2>&1
-    sleep 1
-    echo "30" "Stopping and disabling Xray service..."
-    sudo systemctl stop xray && sudo systemctl disable xray > /dev/null 2>&1
-    sleep 1
-    echo "70" "Uninstalling Xray..."
-    sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove > /dev/null 2>&1
-    sleep 1
-    echo "100" "Xray Uninstallation completed!"
-    sleep 1
-    ) | dialog --title "Xray Uninstallation" --gauge "Xray Uninstallation in progress..." 10 100 0
-    whiptail --title "Xray Uninstallation" --msgbox "Xray Uninstallation completed!" 8 60
-    clear
+    if whiptail --title "Confirm Uninstallation" --yesno "Are you sure you want to uninstall Xray?" 8 60; then
+        (
+        echo "10" "Removing Xray configuration..."
+        sudo rm /usr/local/etc/xray/config.json > /dev/null 2>&1
+        sleep 1
+        echo "30" "Stopping and disabling Xray service..."
+        sudo systemctl stop xray && sudo systemctl disable xray > /dev/null 2>&1
+        sleep 1
+        echo "70" "Uninstalling Xray..."
+        sudo bash -c "$(curl -sL https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove > /dev/null 2>&1
+        sleep 1
+        echo "100" "Xray Uninstallation completed!"
+        sleep 1
+        ) | dialog --title "Xray Uninstallation" --gauge "Xray Uninstallation in progress..." 10 100 0
+        whiptail --title "Xray Uninstallation" --msgbox "Xray Uninstallation completed!" 8 60
+        clear
+    else
+        whiptail --title "Xray Uninstallation" --msgbox "Uninstallation cancelled." 8 60
+        clear
+    fi
 }
 
 ##############################
 ## Functions for HA-Proxy setup
 install_haproxy() {
+    if systemctl is-active --quiet haproxy; then
+        if ! (whiptail --title "Confirm Installation" --yesno "HAProxy service is already active. Do you want to reinstall?" 8 60); then
+            whiptail --title "Installation Cancelled" --msgbox "Installation cancelled. HAProxy service remains active." 8 60
+            return
+        fi
+    fi
+
     {
         echo "10" "Installing HAProxy..."
-        sudo apt-get install haproxy -y > /dev/null 2>&1
+        sudo $PACKAGE_MANAGER install haproxy -y > /dev/null 2>&1
         sleep 1
         echo "30" "Downloading haproxy.cfg..."
-        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg" > /dev/null 2>&1
+        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/ReturnFI/Port-Shifter/main/haproxy.cfg" > /dev/null 2>&1
         sleep 1
         echo "50" "Removing existing haproxy.cfg..."
         sudo rm /etc/haproxy/haproxy.cfg > /dev/null 2>&1
@@ -360,9 +528,9 @@ install_haproxy() {
 
         status=$(sudo systemctl is-active haproxy)
         if [ "$status" = "active" ]; then
-            whiptail --title "HAProxy Installation" --msgbox "HA-Proxy tunnel is installed and active." 8 60
+            whiptail --title "HAProxy Installation" --msgbox "HAProxy tunnel is installed and active." 8 60
         else
-            whiptail --title "HAProxy Installation" --msgbox "HA-Proxy service is not active. Status: $status." 8 60
+            whiptail --title "HAProxy Installation" --msgbox "HAProxy service is not active. Status: $status." 8 60
         fi
     else
         whiptail --title "HAProxy Installation" --msgbox "Invalid IP input. Please ensure the field is filled correctly." 8 60
@@ -377,21 +545,132 @@ check_haproxy() {
     whiptail --title "haproxy Service Status and Ports" --msgbox "$info" 15 70
 }
 
-uninstall_haproxy() {
-    {
-        echo "20" "Stopping HAProxy service..."
-        sudo systemctl stop haproxy > /dev/null 2>&1
-        sleep 1
-        echo "40" "Disabling HAProxy service..."
-        sudo systemctl disable haproxy > /dev/null 2>&1
-        sleep 1
-        echo "60" "Removing HAProxy..."
-        sudo apt-get remove --purge haproxy -y > /dev/null 2>&1
-        sleep 1
-    } | dialog --title "HAProxy Uninstallation" --gauge "Uninstalling HAProxy..." 10 60 0
+add_frontend_backend() {
 
-    whiptail --title "HAProxy Uninstallation" --msgbox "HA-Proxy Uninstalled." 8 60
-    clear
+    if ! systemctl is-active --quiet haproxy; then
+        whiptail --title "HAProxy Not Active" --msgbox "HAProxy service is not active.\nPlease start HAProxy before adding new configuration." 8 60
+        return
+    fi
+
+    while true; do
+        frontend_port=$(whiptail --inputbox "Enter Relay-Server Free Port (1-65535):" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+        exit_status=$?
+        if [ $exit_status != 0 ]; then
+            whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+            return
+        fi
+        
+        if [[ "$frontend_port" =~ ^[0-9]+$ ]] && [ "$frontend_port" -ge 1 ] && [ "$frontend_port" -le 65535 ]; then
+            if grep -q "frontend tunnel-$frontend_port" /etc/haproxy/haproxy.cfg; then
+                whiptail --title "Port Already Used" --msgbox "Port $frontend_port is already in use. Please choose another port." 8 60
+            else
+                break
+            fi
+        else
+            whiptail --title "Invalid Input" --msgbox "Please enter a valid numeric port between 1 and 65535." 8 60
+        fi
+    done
+
+    backend_ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "Add Frontend/Backend" 3>&1 1>&2 2>&3)
+    exit_status=$?
+    if [ $exit_status != 0 ]; then
+        whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+        return
+    fi
+
+    while true; do
+        backend_port=$(whiptail --inputbox "Enter Main-Server Port (1-65535):" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+        exit_status=$?
+        if [ $exit_status != 0 ]; then
+            whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
+            return
+        fi
+        
+        if [[ "$backend_port" =~ ^[0-9]+$ ]] && [ "$backend_port" -ge 1 ] && [ "$backend_port" -le 65535 ]; then
+            break
+        else
+            whiptail --title "Invalid Input" --msgbox "Please enter a valid numeric port between 1 and 65535." 8 60
+        fi
+    done
+
+    {
+        echo ""
+        echo "frontend tunnel-$frontend_port"
+        echo "    bind *:$frontend_port"
+        echo "    mode tcp"
+        echo "    default_backend tunnel-$backend_port"
+        echo ""
+        echo "backend tunnel-$backend_port"
+        echo "    mode tcp"
+        echo "    server target_server $backend_ip:$backend_port"
+    } | sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null
+
+    sudo systemctl restart haproxy > /dev/null 2>&1
+
+    whiptail --title "Frontend/Backend Added" --msgbox "New frontend and backend added successfully.\n\nFrontend: tunnel-$frontend_port\nBackend: tunnel-$backend_port" 10 60
+}
+
+remove_frontend_backend() {
+    
+    frontends=$(grep -E '^frontend ' /etc/haproxy/haproxy.cfg | awk '{print $2}')
+    
+    
+    options=""
+    for frontend in $frontends; do
+        default_backend=$(grep -E "^frontend $frontend$" /etc/haproxy/haproxy.cfg -A 10 | grep 'default_backend' | awk '{print $2}')
+        options+="$frontend \"$default_backend\" "
+    done
+
+    
+    selected=$(whiptail --menu "Select Frontend to Remove" 20 60 10 $options 3>&1 1>&2 2>&3)
+
+    if [[ -n "$selected" ]]; then
+        frontend_name=$selected
+        backend_name=$(grep -E "^frontend $frontend_name$" /etc/haproxy/haproxy.cfg -A 10 | grep 'default_backend' | awk '{print $2}')
+
+        
+        if [[ -n "$backend_name" ]]; then
+            
+            sudo sed -i "/^frontend $frontend_name$/,/^$/d" /etc/haproxy/haproxy.cfg
+
+            
+            sudo sed -i "/^backend $backend_name$/,/^$/d" /etc/haproxy/haproxy.cfg
+
+            
+            sudo systemctl restart haproxy > /dev/null 2>&1
+
+            
+            whiptail --title "Frontend/Backend Removed" --msgbox "Frontend '$frontend_name' and Backend '$backend_name' removed successfully." 8 60
+        else
+            
+            whiptail --title "Error" --msgbox "Could not find the default backend for frontend '$frontend_name'." 8 60
+        fi
+    else
+        
+        whiptail --title "Cancelled" --msgbox "No frontend selected. Operation cancelled." 8 60
+    fi
+}
+
+uninstall_haproxy() {
+    if (whiptail --title "Confirm Uninstallation" --yesno "Are you sure you want to uninstall HAProxy?" 8 60); then
+        {
+            echo "20" "Stopping HAProxy service..."
+            sudo systemctl stop haproxy > /dev/null 2>&1
+            sleep 1
+            echo "40" "Disabling HAProxy service..."
+            sudo systemctl disable haproxy > /dev/null 2>&1
+            sleep 1
+            echo "60" "Removing HAProxy..."
+            sudo $PACKAGE_MANAGER remove haproxy -y > /dev/null 2>&1
+            sleep 1
+        } | dialog --title "HAProxy Uninstallation" --gauge "Uninstalling HAProxy..." 10 60 0
+
+        whiptail --title "HAProxy Uninstallation" --msgbox "HAProxy Uninstalled." 8 60
+        clear
+    else
+        whiptail --title "HAProxy Uninstallation" --msgbox "Uninstallation cancelled." 8 60
+        clear
+    fi
 }
 
 
@@ -690,6 +969,7 @@ gost_menu() {
         "Install" "Install GOST" \
         "Status" "Check GOST Port And Status" \
         "Add" "Add Another Port And Domain" \
+        "Remove" "Remove Port And Domain" \
         "Uninstall" "Uninstall GOST" \
         "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
@@ -705,6 +985,9 @@ gost_menu() {
                     ;;
                 Add)
                     add_port_gost
+                    ;;
+                Remove)
+                    remove_port_gost
                     ;;
                 Uninstall)
                     uninstall_gost
@@ -773,6 +1056,8 @@ haproxy_menu() {
         choice=$(whiptail --backtitle "Hiddify Relay Builder" --title "HA-Proxy Menu" --menu "Please choose one of the following options:" 20 60 10 \
         "Install" "Install HA-Proxy" \
         "Status" "Check HA-Proxy Port and Status" \
+        "Add" "Add more tunnel Configuration" \
+        "Remove" "Remove tunnel Configuration" \
         "Uninstall" "Uninstall HAProxy" \
         "Back" "Back To Main Menu" 3>&1 1>&2 2>&3)
 
@@ -785,6 +1070,12 @@ haproxy_menu() {
                     ;;
                 Status)
                     check_haproxy
+                    ;;
+                Add)
+                    add_frontend_backend
+                    ;;
+                Remove)
+                    remove_frontend_backend
                     ;;
                 Uninstall)
                     uninstall_haproxy
