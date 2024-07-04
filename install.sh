@@ -826,7 +826,7 @@ socat_menu() {
                     uninstall_socat
                     ;;
                 Back)
-                    menu
+                    DeprecatedTunnel
                     ;;
                 *)
                     whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
@@ -862,7 +862,7 @@ wstunnel_menu() {
                     uninstall_wstunnel
                     ;;
                 Back)
-                    menu
+                    DeprecatedTunnel
                     ;;
                 *)
                     whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
@@ -881,6 +881,7 @@ function other_options_menu() {
         "DNS" "Configure DNS" \
         "Update" "Update Server" \
         "Ping" "Ping to check internet connectivity" \
+        "DeprecatedTunnel" "No longer supported"\
         "Back" "Return to Main Menu" 3>&1 1>&2 2>&3)
 
         # Check the return value of the whiptail command
@@ -896,6 +897,9 @@ function other_options_menu() {
                 Ping)
                     ping_websites
                     ;;
+                DeprecatedTunnel)
+                    DeprecatedTunnel
+                    ;;
                 Back)
                     menu
                     ;;
@@ -908,6 +912,39 @@ function other_options_menu() {
         fi
     done
 }
+
+#################################
+# Define the main graphical menu
+function DeprecatedTunnel() {
+    while true; do
+        choice=$(whiptail --backtitle "Welcome to Hiddify Relay Builder" --title "Choose Your Tunnel Mode" --menu "Please choose one of the following options:" 20 60 10 \
+        "Socat" "Manage Socat Tunnel" \
+        "WST" "Manage Web Socket Tunnel"\
+        "Back" "Return to Main Menu" 3>&1 1>&2 2>&3)
+
+        # Check the return value of the whiptail command
+        if [ $? -eq 0 ]; then
+            # Check if the user selected a valid option
+            case $choice in
+                Socat)
+                    socat_menu
+                    ;;
+                WST)
+                    wstunnel_menu
+                    ;;
+                Back)
+                    other_options_menu
+                    ;;
+                *)
+                    whiptail --title "Invalid Option" --msgbox "Please select a valid option." 8 60
+                    ;;
+            esac
+        else
+            exit 1
+        fi
+    done
+}
+
 #################################
 # Define the main graphical menu
 function menu() {
@@ -917,8 +954,6 @@ function menu() {
         "GOST" "Manage GOST Tunnel" \
         "Dokodemo-Door" "Manage Dokodemo-Door Tunnel" \
         "HA-Proxy" "Manage HA-Proxy Tunnel" \
-        "Socat" "Manage Socat Tunnel" \
-        "WST" "Manage Web Socket Tunnel" \
         "Options" "Additional Configuration Options" \
         "Quit" "Exit From The Script" 3>&1 1>&2 2>&3)
 
@@ -937,12 +972,6 @@ function menu() {
                     ;;
                 HA-Proxy)
                     haproxy_menu
-                    ;;
-                Socat)
-                    socat_menu
-                    ;;
-                WST)
-                    wstunnel_menu
                     ;;
                 Options)
                     other_options_menu
