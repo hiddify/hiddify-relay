@@ -864,17 +864,48 @@ ENDSSH
     whiptail --title "wstunnel Uninstallation" --msgbox "Wstunnel Service Uninstalled." 8 60
 }
 
+configure_dns() {
 
-function configure_dns() {
+    sudo cp /etc/resolv.conf /etc/resolv.conf.backup
     sudo rm /etc/resolv.conf > /dev/null 2>&1
 
-    dns1=$(whiptail --inputbox "Enter DNS Server 1(like 8.8.8.8):" 8 60 3>&1 1>&2 2>&3)
-    dns2=$(whiptail --inputbox "Enter DNS Server 2(like 8.8.4.4):" 8 60 3>&1 1>&2 2>&3)
+    dns1=$(whiptail --inputbox "Enter DNS Server 1 (like 8.8.8.8):" 8 60 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    
+    if [ $exitstatus != 0 ] || [ -z "$dns1" ]; then
+        whiptail --title "DNS Configuration" --msgbox "Operation cancelled or invalid input. Restoring default DNS configuration." 8 60
+        restore_dns
+        exit 1
+    fi
 
-    echo "nameserver $dns1" | sudo tee -a /etc/resolv.conf
-    echo "nameserver $dns2" | sudo tee -a /etc/resolv.conf
+    dns2=$(whiptail --inputbox "Enter DNS Server 2 (like 8.8.4.4):" 8 60 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    
+    if [ $exitstatus != 0 ] || [ -z "$dns2" ]; then
+        whiptail --title "DNS Configuration" --msgbox "Operation cancelled or invalid input. Restoring default DNS configuration." 8 60
+        restore_dns
+        exit 1
+    fi
+
+    echo "nameserver $dns1" | sudo tee -a /etc/resolv.conf > /dev/null
+    echo "nameserver $dns2" | sudo tee -a /etc/resolv.conf > /dev/null
 
     whiptail --title "DNS Configuration" --msgbox "DNS Configuration completed." 8 60
+    clear
+}
+
+restore_dns() {
+    echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+    echo "nameserver 1.1.1.1" | sudo tee -a /etc/resolv.conf > /dev/null
+}
+
+function update_server() {
+    (
+        sudo apt-get update -y
+        echo "100" "Update completed."
+    ) | dialog --title "Update Server" --progressbox 30 120
+
+    whiptail --title "Update Server" --msgbox "Server Update completed." 8 60
     clear
 }
 
