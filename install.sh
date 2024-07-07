@@ -909,16 +909,6 @@ function update_server() {
     clear
 }
 
-function update_server() {
-    (
-        sudo apt-get update -y
-        echo "100" "Update completed."
-    ) | dialog --title "Update Server" --progressbox 30 120
-
-    whiptail --title "Update Server" --msgbox "Server Update completed." 8 60
-    clear
-}
-
 function ping_websites() {
     websites=("github.com" "google.com" "www.cloudflare.com")
     results_file=$(mktemp)
