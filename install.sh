@@ -901,7 +901,7 @@ restore_dns() {
 
 function update_server() {
     (
-        sudo apt-get update -y
+        sudo $PACKAGE_MANAGER update -y
         echo "100" "Update completed."
     ) | dialog --title "Update Server" --progressbox 30 120
 
