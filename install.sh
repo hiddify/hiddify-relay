@@ -511,7 +511,7 @@ install_haproxy() {
         fi
     done
 
-    target_ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
+    target_ip=$(whiptail --inputbox "Enter Main-Server IP or Domain:" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
 
     while true; do
         target_port=$(whiptail --inputbox "Enter Main-Server Port (1-65535):" 8 60 --title "HAProxy Installation" 3>&1 1>&2 2>&3)
@@ -571,7 +571,7 @@ add_frontend_backend() {
         fi
     done
 
-    backend_ip=$(whiptail --inputbox "Enter Main-Server IP:" 8 60 --title "Add Frontend/Backend" 3>&1 1>&2 2>&3)
+    backend_ip=$(whiptail --inputbox "Enter Main-Server IP or Domain:" 8 60 --title "Add Frontend/Backend" 3>&1 1>&2 2>&3)
     exit_status=$?
     if [ $exit_status != 0 ]; then
         whiptail --title "Cancelled" --msgbox "Operation cancelled. Returning to menu." 8 60
