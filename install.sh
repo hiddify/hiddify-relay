@@ -1,5 +1,7 @@
 #!/bin/bash
 
+repository_url=https://raw.githubusercontent.com/hiddify/hiddify-relay/dev/
+
 # Check if the user has sudo permissions
 if sudo -n true 2>/dev/null; then
     echo "This User has sudo permissions"
@@ -170,7 +172,7 @@ install_gost() {
         echo "10"
         curl -fsSL https://github.com/go-gost/gost/raw/master/install.sh | bash -s -- --install > /dev/null 2>&1
         echo "50"
-        sudo wget -q -O /usr/lib/systemd/system/gost.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/gost.service > /dev/null 2>&1
+        sudo wget -q -O /usr/lib/systemd/system/gost.service "$repository_url"/config/gost.service > /dev/null 2>&1
         sleep 1
         echo "70"
     } | dialog --title "GOST Installation" --gauge "Installing GOST..." 10 60
@@ -343,7 +345,7 @@ install_xray() {
         fi
     done
 
-    wget -q -O /tmp/config.json https://raw.githubusercontent.com/hiddify/hiddify-relay/main/config.json
+    wget -q -O /tmp/config.json "$repository_url"/config/config.json
 
     jq --arg address "$address" --arg port "$port" '.inbounds[1].port = ($port | tonumber) | .inbounds[1].settings.address = $address | .inbounds[1].settings.port = ($port | tonumber) | .inbounds[1].tag = "inbound-" + $port' /tmp/config.json > /usr/local/etc/xray/config.json
     clear
@@ -543,7 +545,7 @@ install_haproxy() {
         sudo $PACKAGE_MANAGER install haproxy -y > /dev/null 2>&1
         sleep 1
         echo "30" "Downloading haproxy.cfg..."
-        wget -q -O /tmp/haproxy.cfg "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/haproxy.cfg" > /dev/null 2>&1
+        wget -q -O /tmp/haproxy.cfg "$repository_url"/config/haproxy.cfg > /dev/null 2>&1
         sleep 1
         echo "50" "Removing existing haproxy.cfg..."
         sudo rm /etc/haproxy/haproxy.cfg > /dev/null 2>&1
@@ -735,7 +737,7 @@ install_socat() {
     sudo apt-get install socat -y > /dev/null 2>&1
     sleep 1
     echo "80" "Downloading Socat.service..."
-    sudo wget -O /etc/systemd/system/socat.service "https://raw.githubusercontent.com/hiddify/hiddify-relay/main/socat-tunnel.service" > /dev/null 2>&1
+    sudo wget -O /etc/systemd/system/socat.service "$repository_url"/config/socat-tunnel.service > /dev/null 2>&1
     sleep 1
     } | dialog --title "Socat Installation" --gauge "Installing Socat..." 10 60 0
 
@@ -803,7 +805,7 @@ install_wstunnel() {
     sudo rm /etc/systemd/system/wstunnel.service > /dev/null 2>&1
     sleep 1
     echo "90"
-    wget -O /etc/systemd/system/wstunnel.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/wstunnels.service > /dev/null 2>&1
+    wget -O /etc/systemd/system/wstunnel.service "$repository_url"/config/wstunnels.service > /dev/null 2>&1
     sleep 1
     } | dialog --title "Wstunnel Installation" --gauge "Installing Wstunnel..." 10 60
     whiptail --title "wstunnel Installation" --msgbox "wstunnel installation completed." 8 60
@@ -850,7 +852,7 @@ install_wstunnel() {
         fi
     done
 
-    wget -O wstunnelm.service https://raw.githubusercontent.com/hiddify/hiddify-relay/main/wstunnelm.service > /dev/null 2>&1
+    wget -O wstunnelm.service "$repository_url"/config/wstunnelm.service > /dev/null 2>&1
     sed -i "s/\$port/$port/g" wstunnelm.service
     clear
     scp -P $main_server_port wstunnelm.service $ssh_user@$main_server_ip:/tmp/wstunnelm.service
