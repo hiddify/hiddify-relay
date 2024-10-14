@@ -1,6 +1,6 @@
 #!/bin/bash
 
-repository_url=https://raw.githubusercontent.com/hiddify/hiddify-relay/dev/
+repository_url="https://raw.githubusercontent.com/hiddify/hiddify-relay/dev/"
 
 # Check if the user has sudo permissions
 if sudo -n true 2>/dev/null; then
