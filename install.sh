@@ -51,8 +51,10 @@ fi
 
 if [ "$PACKAGE_MANAGER" = "apt" ]; then
     sudo apt update -qq
+    echo "Update Server"
 else
     sudo $PACKAGE_MANAGER update -y -q
+    echo "Update Server"
 fi
 
 install_package() {
@@ -60,13 +62,13 @@ install_package() {
     if ! command -v $package &> /dev/null; then
         echo -n "Installing $package..."
         if sudo $PACKAGE_MANAGER install $package -y -qq; then
-            echo -e " \e[32m✔\e[0m"
+            echo -e "✅"
         else
             echo -e " \e[31m✘\e[0m"
             exit 1
         fi
     else
-        echo "$package is already installed \e[32m✔\e[0m"
+        echo "$package is already installed ✅"
     fi
 }
 
