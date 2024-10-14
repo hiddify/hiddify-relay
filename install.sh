@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Check if the user has sudo permissions
 if sudo -n true 2>/dev/null; then
     echo "This User has sudo permissions"
 else
@@ -8,7 +7,6 @@ else
     exit 1
 fi
 
-# Detect OS and set package/service managers
 if [ -f /etc/redhat-release ]; then
     if grep -q "Rocky" /etc/redhat-release; then
         OS="Rocky"
@@ -51,19 +49,24 @@ else
     exit 1
 fi
 
-# Update
 if [ "$PACKAGE_MANAGER" = "apt" ]; then
-    sudo apt update
+    sudo apt update -qq
 else
-    sudo $PACKAGE_MANAGER update -y
+    sudo $PACKAGE_MANAGER update -y -q
 fi
 
-# Install necessary packages
 install_package() {
     package=$1
     if ! command -v $package &> /dev/null; then
-        echo "Installing $package..."
-        sudo $PACKAGE_MANAGER install $package -y
+        echo -n "Installing $package..."
+        if sudo $PACKAGE_MANAGER install $package -y -qq; then
+            echo -e " \e[32m✔\e[0m"
+        else
+            echo -e " \e[31m✘\e[0m"
+            exit 1
+        fi
+    else
+        echo "$package is already installed \e[32m✔\e[0m"
     fi
 }
 
@@ -74,7 +77,6 @@ install_package lsof
 install_package tar 
 install_package wget
 
-# Check if the alias already exists in .bashrc
 if ! grep -q "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" ~/.bashrc; then
     echo "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" >> ~/.bashrc
     echo "Alias added to .bashrc"
@@ -84,7 +86,9 @@ else
     source ~/.bashrc
 fi
 
+sleep 5
 clear
+
 
 git clone -b beta https://github.com/hiddify/hiddify-relay  /opt/hiddify-relay
 
