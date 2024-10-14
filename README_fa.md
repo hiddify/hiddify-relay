@@ -26,6 +26,10 @@
 </div>
 
 ## ⚙️ آموزش نصب و راه‌اندازی
+```shell
+bash <(curl https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)
+```
+
 برای مشاهده آموزش نصب و راه‌اندازی این اپ، [این مقاله](https://hiddify.com/fa/manager/domain-worker-cdn-and-tunneling/How-to-setup-relay-server-using-Hiddify-Relay-Builder/) را ملاحظه نمایید.
 
 
