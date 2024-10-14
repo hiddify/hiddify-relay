@@ -62,13 +62,13 @@ install_package() {
     if ! command -v $package &> /dev/null; then
         echo -n "Installing $package..."
         if sudo $PACKAGE_MANAGER install $package -y -qq; then
-            echo -e "✅"
+            echo -e "✓"
         else
-            echo -e " \e[31m✘\e[0m"
+            echo -e " ✕"
             exit 1
         fi
     else
-        echo "$package is already installed ✅"
+        echo "$package is already installed ✓"
     fi
 }
 
