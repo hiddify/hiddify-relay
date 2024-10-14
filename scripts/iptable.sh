@@ -1,4 +1,5 @@
 source /opt/hiddify-relay/scripts/path.sh
+source /opt/hiddify-relay/scripts/package.sh
 
 install_iptables() {
     IP=$(whiptail --inputbox "Enter your main server IP like (1.1.1.1):" 8 60 3>&1 1>&2 2>&3)
