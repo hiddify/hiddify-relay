@@ -70,12 +70,10 @@ install_package() {
     fi
 }
 
-# Install all necessary packages
 for package in "${necessary_packages[@]}"; do
     install_package "$package"
 done
 
-# Add alias to .bashrc if not already present
 if ! grep -q "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" ~/.bashrc; then
     echo "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" >> ~/.bashrc
     echo "Alias added to .bashrc"
