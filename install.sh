@@ -41,10 +41,10 @@ fi
 
 if [ "$PACKAGE_MANAGER" = "apt" ]; then
     echo "Updating server"
-    sudo apt update -qq > /dev/null 2>&1 && echo "Server updated"
+    sudo apt update -qq > /dev/null 2>&1 && echo "Server updated ✓"
 else
     echo "Updating server"
-    sudo $PACKAGE_MANAGER update -y -q > /dev/null 2>&1 && echo "Server updated"
+    sudo $PACKAGE_MANAGER update -y -q > /dev/null 2>&1 && echo "Server updated ✓"
 fi
 
 necessary_packages=(
