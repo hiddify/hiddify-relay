@@ -23,6 +23,11 @@ This script provides you with the following methods to create a tunnel between a
 </div>
 
 ## ⚙️ Tutorials on setup and installation
+
+```shell
+bash <(curl https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)
+```
+
 To view tutorial on setup and installation take a look at [this article](https://hiddify.com/manager/domain-worker-cdn-and-tunneling/How-to-setup-relay-server-using-Hiddify-Relay-Builder/)
 
 
