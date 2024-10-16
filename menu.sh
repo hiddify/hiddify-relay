@@ -1,3 +1,4 @@
+#!/bin/bash
 
 for script in /opt/hiddify-relay/scripts/*.sh; do
   source "$script"
