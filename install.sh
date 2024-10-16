@@ -88,7 +88,7 @@ fi
 sleep 3
 clear
 
-git clone -b beta https://github.com/hiddify/hiddify-relay /opt/hiddify-relay > /dev/null 2>&1
+git clone https://github.com/hiddify/hiddify-relay /opt/hiddify-relay > /dev/null 2>&1
 cd /opt/hiddify-relay
 chmod +x menu.sh
 ./menu.sh
