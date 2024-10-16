@@ -76,6 +76,13 @@ for package in "${necessary_packages[@]}"; do
     install_package "$package"
 done
 
+# If the old alias exists, remove it
+if grep -q "alias relay='bash -c \"\$(curl -L https://raw.githubusercontent.com/hiddify/hiddify-relay/main/install.sh)\"'" ~/.bashrc; then
+    sed -i '/alias relay='"'"'bash -c "\$(curl -L https:\/\/raw.githubusercontent.com\/hiddify\/hiddify-relay\/main\/install.sh)"'"'"'/d' ~/.bashrc
+    echo "Old alias removed from .bashrc"
+fi
+
+
 if ! grep -q "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" ~/.bashrc; then
     echo "alias relay='bash -c \"/opt/hiddify-relay/menu.sh\"'" >> ~/.bashrc
     echo "Alias added to .bashrc"
